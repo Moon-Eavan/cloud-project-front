@@ -5,6 +5,8 @@ import Sidebar from './components/Sidebar';
 import CalendarView from './components/CalendarView';
 import TodoView from './components/TodoView';
 import GanttView from './components/GanttView';
+import GroupView from './components/GroupView';
+import FriendView from './components/FriendView';
 import TaskPopup from './components/TaskPopup';
 
 const AppContainer = styled.div`
@@ -46,20 +48,13 @@ function AppContent() {
 
   // 현재 활성화된 뷰 렌더링
   const renderView = () => {
-    // 일정 탭이 아니면 준비 중 메시지
-    if (activeMenu !== '일정') {
-      return (
-        <div style={{ 
-          flex: 1, 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          fontSize: '24px',
-          color: 'rgba(0, 0, 0, 0.3)'
-        }}>
-          {activeMenu} 기능 준비 중
-        </div>
-      );
+    // 메뉴에 따라 다른 뷰 렌더링
+    if (activeMenu === '그룹') {
+      return <GroupView />;
+    }
+    
+    if (activeMenu === '친구') {
+      return <FriendView />;
     }
 
     // 일정 탭에서는 currentView에 따라 렌더링
