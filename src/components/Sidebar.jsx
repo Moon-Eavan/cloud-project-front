@@ -76,12 +76,10 @@ const MenuText = styled.span`
 const Footer = styled.div`
   margin-top: auto;
   padding: 48px 40px;
-  border-top: 1px solid #e0e0e0;
 `;
 
 const SmallCalendar = styled.div`
-  background-color: #f9f9f9;
-  border-radius: 10px;
+  background-color: transparent;
   padding: 10px;
   margin-bottom: 32px;
   
@@ -120,6 +118,12 @@ const SmallCalendar = styled.div`
       background-color: rgba(12, 65, 255, 0.1);
     }
   }
+`;
+
+const Divider = styled.hr`
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 0 0 32px 0;
 `;
 
 const UserProfile = styled.div`
@@ -243,6 +247,8 @@ const Sidebar = ({ activeMenu, onMenuChange }) => {
             ))}
           </div>
         </SmallCalendar>
+        
+        <Divider />
         
         <UserProfile>
           <UserAvatar src="https://via.placeholder.com/52" alt="User" />

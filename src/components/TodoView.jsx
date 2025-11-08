@@ -15,15 +15,16 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 30px 48px;
-  background-color: #fefefe;
+  background-color: #f7f8f9;
 `;
 
 const ViewTabs = styled.div`
   display: flex;
-  background-color: #fefefe;
+  background-color: #ffffff;
   border-radius: 15px;
   padding: 6px;
   gap: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
 `;
 
 const Tab = styled.button`
