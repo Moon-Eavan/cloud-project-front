@@ -1,4 +1,6 @@
 import styled from 'styled-components';
+import personIcon from '../assets/icons/person.2.fill.svg';
+import listIcon from '../assets/icons/list.bullet.indent.svg';
 
 const SidebarContainer = styled.div`
   width: 440px;
@@ -54,6 +56,15 @@ const MenuIcon = styled.span`
   color: ${props => props.$active ? '#fefefe' : '#000'};
   margin-right: 12px;
   width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const MenuIconImage = styled.img`
+  width: 24px;
+  height: 24px;
+  filter: ${props => props.$active ? 'brightness(0) invert(1)' : 'none'};
 `;
 
 const MenuText = styled.span`
@@ -146,9 +157,9 @@ const UserEmail = styled.a`
 `;
 
 const menuItems = [
-  { id: '일정', icon: '􀋳', text: '일정' },
-  { id: '그룹', icon: '􂕝', text: '그룹' },
-  { id: '친구', icon: '􀉬', text: '친구' }
+  { id: '일정', icon: listIcon, text: '일정', type: 'image' },
+  { id: '그룹', icon: '􂕝', text: '그룹', type: 'text' },
+  { id: '친구', icon: personIcon, text: '친구', type: 'image' }
 ];
 
 const Sidebar = ({ activeMenu, onMenuChange }) => {
@@ -202,7 +213,13 @@ const Sidebar = ({ activeMenu, onMenuChange }) => {
             $active={activeMenu === item.id}
             onClick={() => onMenuChange(item.id)}
           >
-            <MenuIcon $active={activeMenu === item.id}>{item.icon}</MenuIcon>
+            <MenuIcon $active={activeMenu === item.id}>
+              {item.type === 'image' ? (
+                <MenuIconImage src={item.icon} alt={item.text} $active={activeMenu === item.id} />
+              ) : (
+                item.icon
+              )}
+            </MenuIcon>
             <MenuText $active={activeMenu === item.id}>{item.text}</MenuText>
           </MenuItem>
         ))}
