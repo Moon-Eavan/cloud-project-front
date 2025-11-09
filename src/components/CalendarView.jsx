@@ -156,6 +156,8 @@ const DayCell = styled.div`
   padding: 12px;
   position: relative;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   
   &::-webkit-scrollbar {
     width: 4px;
@@ -167,32 +169,63 @@ const DayCell = styled.div`
   }
 `;
 
+const DayNumberWrapper = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 8px;
+  height: 32px;
+`;
+
 const DayNumber = styled.div`
-  font-size: 24px;
+  font-size: 18px;
   font-weight: normal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
   color: ${props => {
-    if (props.$isToday) return '#0064ff';
-    if (props.$isSunday) return '#ff0707';
-    if (props.$isSaturday) return '#0064ff';
+    if (props.$isToday) return '#ffffff';
     return '#000';
   }};
-  margin-bottom: 8px;
-  text-align: right;
+  ${props => props.$isToday ? `
+    width: 32px;
+    border-radius: 50%;
+    background-color: #ff0707;
+    box-sizing: border-box;
+  ` : ''}
 `;
 
 const TaskItem = styled.div`
-  background-color: ${props => props.$color};
-  color: white;
-  padding: 6px 8px;
-  border-radius: 4px;
-  margin-bottom: 6px;
-  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 8px;
   cursor: pointer;
   transition: opacity 0.2s;
+  height: 16px;
   
   &:hover {
     opacity: 0.8;
   }
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const TaskBar = styled.div`
+  width: 6px;
+  height: 16px;
+  background-color: ${props => props.$color};
+  border-radius: 15px;
+  flex-shrink: 0;
+`;
+
+const TaskText = styled.div`
+  font-size: 14px;
+  color: #000;
+  line-height: 16px;
 `;
 
 const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
@@ -298,25 +331,23 @@ const CalendarView = ({ onViewChange }) => {
         <CalendarGrid>
           {calendarData.map((dayData, index) => {
             const dayTasks = getTasksForDay(new Date(dayData.date));
-            const isSunday = index % 7 === 0;
-            const isSaturday = index % 7 === 6;
             
             return (
               <DayCell key={index}>
-                <DayNumber 
-                  $isToday={dayData.isToday}
-                  $isSunday={isSunday}
-                  $isSaturday={isSaturday}
-                >
-                  {dayData.date.getDate()}
-                </DayNumber>
+                <DayNumberWrapper>
+                  <DayNumber 
+                    $isToday={dayData.isToday}
+                  >
+                    {dayData.date.getDate()}
+                  </DayNumber>
+                </DayNumberWrapper>
                 {dayTasks.map(task => (
                   <TaskItem
                     key={task.id}
-                    $color={task.color}
                     onClick={() => openEditTask(task)}
                   >
-                    {task.title}
+                    <TaskBar $color={task.color} />
+                    <TaskText>{task.title}</TaskText>
                   </TaskItem>
                 ))}
               </DayCell>
