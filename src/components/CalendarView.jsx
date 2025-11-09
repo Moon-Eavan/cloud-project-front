@@ -172,41 +172,60 @@ const DayCell = styled.div`
 const DayNumberWrapper = styled.div`
   display: flex;
   justify-content: flex-start;
+  align-items: center;
   margin-bottom: 8px;
+  height: 32px;
 `;
 
 const DayNumber = styled.div`
   font-size: 18px;
   font-weight: normal;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
   color: ${props => {
     if (props.$isToday) return '#ffffff';
     return '#000';
   }};
   ${props => props.$isToday ? `
     width: 32px;
-    height: 32px;
     border-radius: 50%;
     background-color: #ff0707;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     box-sizing: border-box;
   ` : ''}
 `;
 
 const TaskItem = styled.div`
-  background-color: ${props => props.$color};
-  color: white;
-  padding: 4px 6px;
-  border-radius: 4px;
-  margin-bottom: 4px;
-  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-bottom: 8px;
   cursor: pointer;
   transition: opacity 0.2s;
+  height: 16px;
   
   &:hover {
     opacity: 0.8;
   }
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+const TaskBar = styled.div`
+  width: 6px;
+  height: 16px;
+  background-color: ${props => props.$color};
+  border-radius: 15px;
+  flex-shrink: 0;
+`;
+
+const TaskText = styled.div`
+  font-size: 14px;
+  color: #000;
+  line-height: 16px;
 `;
 
 const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
@@ -325,10 +344,10 @@ const CalendarView = ({ onViewChange }) => {
                 {dayTasks.map(task => (
                   <TaskItem
                     key={task.id}
-                    $color={task.color}
                     onClick={() => openEditTask(task)}
                   >
-                    {task.title}
+                    <TaskBar $color={task.color} />
+                    <TaskText>{task.title}</TaskText>
                   </TaskItem>
                 ))}
               </DayCell>
