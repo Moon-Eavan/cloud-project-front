@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import styled from 'styled-components';
 import { useTaskContext } from '../context/TaskContext';
 
@@ -143,7 +143,7 @@ const WeekDay = styled.div`
 const CalendarGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-template-rows: repeat(5, 1fr);
+  grid-template-rows: repeat(6, 1fr);
   gap: 1px;
   background-color: #e0e0e0;
   border: 1px solid #e0e0e0;
@@ -186,6 +186,7 @@ const DayNumber = styled.div`
   height: 32px;
   color: ${props => {
     if (props.$isToday) return '#ffffff';
+    if (!props.$isCurrentMonth) return '#999999';
     return '#000';
   }};
   ${props => props.$isToday ? `
@@ -233,14 +234,57 @@ const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
 const CalendarView = ({ onViewChange }) => {
   const { tasks, openNewTask, openEditTask } = useTaskContext();
   const [currentDate, setCurrentDate] = useState(new Date());
+  const calendarAreaRef = useRef(null);
+  const scrollTimeoutRef = useRef(null);
 
-  const handlePrevMonth = () => {
+  const handlePrevMonth = useCallback(() => {
     setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
-  };
+  }, []);
 
-  const handleNextMonth = () => {
+  const handleNextMonth = useCallback(() => {
     setCurrentDate(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
-  };
+  }, []);
+
+  // 마우스 휠 스크롤로 월 변경
+  useEffect(() => {
+    const calendarArea = calendarAreaRef.current;
+    if (!calendarArea) return;
+
+    const handleWheel = (e) => {
+      // 캘린더 그리드 영역 내에서만 작동
+      const isOverCalendar = e.target.closest('[data-calendar-grid]') || 
+                             e.target.closest('[data-calendar-area]');
+      
+      if (!isOverCalendar) return;
+
+      // 스크롤 방향 확인
+      const deltaY = e.deltaY;
+      
+      // 디바운싱: 빠른 연속 스크롤 방지
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      scrollTimeoutRef.current = setTimeout(() => {
+        if (deltaY > 0) {
+          // 아래로 스크롤 = 다음 달
+          handleNextMonth();
+        } else if (deltaY < 0) {
+          // 위로 스크롤 = 이전 달
+          handlePrevMonth();
+        }
+      }, 150);
+    };
+
+    calendarArea.addEventListener('wheel', handleWheel, { passive: true });
+
+    return () => {
+      calendarArea.removeEventListener('wheel', handleWheel);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [handlePrevMonth, handleNextMonth]);
 
   // Get calendar data
   const calendarData = useMemo(() => {
@@ -275,8 +319,8 @@ const CalendarView = ({ onViewChange }) => {
       });
     }
     
-    // Next month days to fill last week
-    const remainingDays = 35 - days.length;
+    // Next month days to fill last week (6 weeks = 42 days)
+    const remainingDays = 42 - days.length;
     for (let i = 1; i <= remainingDays; i++) {
       days.push({
         date: new Date(year, month + 1, i),
@@ -311,7 +355,7 @@ const CalendarView = ({ onViewChange }) => {
         <AddButton onClick={openNewTask}>􀉊</AddButton>
       </Header>
       
-      <CalendarArea>
+      <CalendarArea ref={calendarAreaRef} data-calendar-area>
         <CalendarHeader>
           <MonthNav>
             <NavButton onClick={handlePrevMonth}>􀄏</NavButton>
@@ -328,7 +372,7 @@ const CalendarView = ({ onViewChange }) => {
           ))}
         </WeekDaysRow>
         
-        <CalendarGrid>
+        <CalendarGrid data-calendar-grid>
           {calendarData.map((dayData, index) => {
             const dayTasks = getTasksForDay(new Date(dayData.date));
             
@@ -337,6 +381,7 @@ const CalendarView = ({ onViewChange }) => {
                 <DayNumberWrapper>
                   <DayNumber 
                     $isToday={dayData.isToday}
+                    $isCurrentMonth={dayData.isCurrentMonth}
                   >
                     {dayData.date.getDate()}
                   </DayNumber>
