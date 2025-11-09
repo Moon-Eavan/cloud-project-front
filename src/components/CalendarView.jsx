@@ -176,15 +176,15 @@ const DayNumberWrapper = styled.div`
 `;
 
 const DayNumber = styled.div`
-  font-size: 24px;
+  font-size: 18px;
   font-weight: normal;
   color: ${props => {
     if (props.$isToday) return '#ffffff';
     return '#000';
   }};
   ${props => props.$isToday ? `
-    width: 38px;
-    height: 38px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background-color: #ff0707;
     display: flex;
@@ -197,10 +197,10 @@ const DayNumber = styled.div`
 const TaskItem = styled.div`
   background-color: ${props => props.$color};
   color: white;
-  padding: 6px 8px;
+  padding: 4px 6px;
   border-radius: 4px;
-  margin-bottom: 6px;
-  font-size: 14px;
+  margin-bottom: 4px;
+  font-size: 12px;
   cursor: pointer;
   transition: opacity 0.2s;
   
