@@ -25,18 +25,31 @@ const ViewTabs = styled.div`
   padding: 6px;
   gap: 8px;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+  min-width: 0;
 `;
 
 const Tab = styled.button`
-  padding: 12px 28px;
+  padding: 8px 20px;
   border: none;
   border-radius: 15px;
   background-color: ${props => props.$active ? '#2c7fff' : 'transparent'};
   color: ${props => props.$active ? '#fefefe' : '#000'};
-  font-size: 24px;
-  letter-spacing: 2.4px;
+  font-size: clamp(14px, 1.5vw, 18px);
+  letter-spacing: clamp(1.4px, 0.15vw, 1.8px);
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
+  
+  @media (max-width: 768px) {
+    padding: 6px 16px;
+    font-size: 14px;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 5px 12px;
+    font-size: 12px;
+  }
   
   &:hover {
     background-color: ${props => props.$active ? '#2c7fff' : 'rgba(44, 127, 255, 0.1)'};
