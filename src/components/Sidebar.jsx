@@ -3,45 +3,58 @@ import personIcon from '../assets/icons/person.2.fill.svg';
 import listIcon from '../assets/icons/list.bullet.indent.svg';
 
 const SidebarContainer = styled.div`
-  width: 440px;
+  width: 300px;
   height: 100vh;
   background-color: #fefefe;
   border-right: 1px solid #e0e0e0;
   display: flex;
   flex-direction: column;
   position: relative;
+  
+  @media (max-width: 1024px) {
+    width: 260px;
+  }
+  
+  @media (max-width: 768px) {
+    width: 240px;
+  }
 `;
 
 const Header = styled.div`
-  height: 98px;
+  height: 70px;
   display: flex;
   align-items: center;
-  padding: 0 45px;
+  padding: 0 24px;
   border-bottom: 1px solid #e0e0e0;
 `;
 
 const Title = styled.h1`
-  font-size: 32px;
+  font-size: 22px;
   font-weight: 600;
-  letter-spacing: 3.2px;
+  letter-spacing: 2.2px;
   color: #000;
   margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 18px;
+    letter-spacing: 1.8px;
+  }
 `;
 
 const MenuList = styled.div`
-  padding: 48px 0;
+  padding: 32px 0;
 `;
 
 const MenuItem = styled.button`
-  width: 360px;
-  height: 64px;
-  margin: 0 40px 8px;
+  width: calc(100% - 40px);
+  height: 48px;
+  margin: 0 20px 6px;
   border: none;
-  border-radius: 15px;
+  border-radius: 12px;
   background-color: ${props => props.$active ? '#2c7fff' : 'transparent'};
   display: flex;
   align-items: center;
-  padding: 0 37px 0 37px;
+  padding: 0 20px;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: ${props => props.$active ? '0px 4px 10px 4px rgba(44, 127, 255, 0.15)' : 'none'};
@@ -49,52 +62,72 @@ const MenuItem = styled.button`
   &:hover {
     background-color: ${props => props.$active ? '#2c7fff' : 'rgba(44, 127, 255, 0.05)'};
   }
+  
+  @media (max-width: 768px) {
+    height: 44px;
+    padding: 0 16px;
+  }
 `;
 
 const MenuIcon = styled.span`
-  font-size: 24px;
+  font-size: 20px;
   color: ${props => props.$active ? '#fefefe' : '#000'};
   margin-right: 12px;
-  width: 36px;
+  width: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
+  
+  @media (max-width: 768px) {
+    font-size: 18px;
+    width: 24px;
+  }
 `;
 
 const MenuIconImage = styled.img`
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   filter: ${props => props.$active ? 'brightness(0) invert(1)' : 'none'};
+  
+  @media (max-width: 768px) {
+    width: 18px;
+    height: 18px;
+  }
 `;
 
 const MenuText = styled.span`
-  font-size: 24px;
+  font-size: 18px;
   color: ${props => props.$active ? '#fefefe' : '#000'};
-  letter-spacing: 2.4px;
+  letter-spacing: 1.8px;
+  
+  @media (max-width: 768px) {
+    font-size: 16px;
+    letter-spacing: 1.6px;
+  }
 `;
 
 const Footer = styled.div`
   margin-top: auto;
-  padding: 48px 40px;
+  padding: 24px 20px;
 `;
 
 const SmallCalendar = styled.div`
   background-color: transparent;
-  padding: 10px;
-  margin-bottom: 32px;
+  padding: 8px;
+  margin-bottom: 20px;
   
   .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
+    gap: 4px;
   }
   
   .calendar-day {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 8px;
-    font-size: 10px;
+    padding: 6px;
+    font-size: 9px;
     color: #333;
     border-radius: 99px;
     cursor: pointer;
@@ -123,40 +156,58 @@ const SmallCalendar = styled.div`
 const Divider = styled.hr`
   border: none;
   border-top: 1px solid #e0e0e0;
-  margin: 0 0 32px 0;
+  margin: 0 0 20px 0;
 `;
 
 const UserProfile = styled.div`
   display: flex;
   align-items: center;
-  gap: 17px;
+  gap: 12px;
 `;
 
 const UserAvatar = styled.img`
-  width: 52px;
-  height: 52px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
+  
+  @media (max-width: 768px) {
+    width: 36px;
+    height: 36px;
+  }
 `;
 
 const UserInfo = styled.div`
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  flex: 1;
 `;
 
 const UserName = styled.span`
-  font-size: 18px;
+  font-size: 16px;
   color: #000;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
+  
+  @media (max-width: 768px) {
+    font-size: 14px;
+  }
 `;
 
 const UserEmail = styled.a`
-  font-size: 14px;
+  font-size: 12px;
   color: rgba(0, 0, 0, 0.5);
   text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   
   &:hover {
     text-decoration: underline;
+  }
+  
+  @media (max-width: 768px) {
+    font-size: 11px;
   }
 `;
 
