@@ -156,6 +156,8 @@ const DayCell = styled.div`
   padding: 12px;
   position: relative;
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   
   &::-webkit-scrollbar {
     width: 4px;
@@ -167,17 +169,29 @@ const DayCell = styled.div`
   }
 `;
 
+const DayNumberWrapper = styled.div`
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+`;
+
 const DayNumber = styled.div`
   font-size: 24px;
   font-weight: normal;
   color: ${props => {
-    if (props.$isToday) return '#0064ff';
-    if (props.$isSunday) return '#ff0707';
-    if (props.$isSaturday) return '#0064ff';
+    if (props.$isToday) return '#ffffff';
     return '#000';
   }};
-  margin-bottom: 8px;
-  text-align: right;
+  ${props => props.$isToday ? `
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background-color: #ff0707;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+  ` : ''}
 `;
 
 const TaskItem = styled.div`
@@ -298,18 +312,16 @@ const CalendarView = ({ onViewChange }) => {
         <CalendarGrid>
           {calendarData.map((dayData, index) => {
             const dayTasks = getTasksForDay(new Date(dayData.date));
-            const isSunday = index % 7 === 0;
-            const isSaturday = index % 7 === 6;
             
             return (
               <DayCell key={index}>
-                <DayNumber 
-                  $isToday={dayData.isToday}
-                  $isSunday={isSunday}
-                  $isSaturday={isSaturday}
-                >
-                  {dayData.date.getDate()}
-                </DayNumber>
+                <DayNumberWrapper>
+                  <DayNumber 
+                    $isToday={dayData.isToday}
+                  >
+                    {dayData.date.getDate()}
+                  </DayNumber>
+                </DayNumberWrapper>
                 {dayTasks.map(task => (
                   <TaskItem
                     key={task.id}
