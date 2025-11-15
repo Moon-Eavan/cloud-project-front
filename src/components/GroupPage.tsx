@@ -10,6 +10,8 @@ import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Checkbox } from './ui/checkbox';
 import When2MeetScheduler from './When2MeetScheduler';
+import { useScheduleContext } from '../store/ScheduleContext';
+import { toast } from 'sonner';
 
 interface Group {
   id: string;
@@ -51,11 +53,6 @@ interface Friend {
   status: 'online' | 'offline';
 }
 
-interface GroupPageProps {
-  onAddEvent: (event: CalendarEvent) => void;
-  friends: Friend[];
-}
-
 const initialGroups: Group[] = [
   {
     id: '1',
@@ -73,8 +70,19 @@ const initialGroups: Group[] = [
   },
 ];
 
-export default function GroupPage({ onAddEvent, friends }: GroupPageProps) {
+const initialFriends: Friend[] = [
+  { id: '1', name: '홍길동', email: 'hong@khu.ac.kr', status: 'online' },
+  { id: '2', name: '김철수', email: 'kim@khu.ac.kr', status: 'offline' },
+  { id: '3', name: '이영희', email: 'lee@khu.ac.kr', status: 'online' },
+  { id: '4', name: '박민수', email: 'park@khu.ac.kr', status: 'offline' },
+  { id: '5', name: '최지은', email: 'choi@khu.ac.kr', status: 'online' },
+  { id: '6', name: '정수아', email: 'jung@khu.ac.kr', status: 'offline' },
+];
+
+export default function GroupPage() {
+  const { createSchedule } = useScheduleContext();
   const [groups, setGroups] = useState<Group[]>(initialGroups);
+  const [friends] = useState<Friend[]>(initialFriends);
   const [events, setEvents] = useState<GroupEvent[]>([]);
   const [isGroupDialogOpen, setIsGroupDialogOpen] = useState(false);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
@@ -146,7 +154,7 @@ export default function GroupPage({ onAddEvent, friends }: GroupPageProps) {
     }
   };
 
-  const handleCreateEvent = () => {
+  const handleCreateEvent = async () => {
     if (selectedGroup && newEvent.title.trim() && newEvent.date && newEvent.startTime) {
       const eventId = Date.now().toString();
       setEvents([
@@ -157,35 +165,33 @@ export default function GroupPage({ onAddEvent, friends }: GroupPageProps) {
           ...newEvent,
         },
       ]);
-      
-      // Build description for calendar event
-      let calendarDescription = newEvent.description || '';
-      if (newEvent.location) {
-        calendarDescription = calendarDescription 
-          ? `${calendarDescription}\n장소: ${newEvent.location}` 
-          : `장소: ${newEvent.location}`;
-      }
-      
-      setNewEvent({ 
-        title: '', 
-        description: '',
-        type: 'offline', 
-        date: getTodayDate(), 
-        startTime: getCurrentHour(), 
-        endTime: getCurrentHourPlus2(),
-        location: '', 
-        members: [] 
-      });
-      setIsEventDialogOpen(false);
-      onAddEvent({
-        id: eventId,
+
+      // 내 캘린더에 일정 추가 (Context를 통해 상태 업데이트)
+      const startDateTime = new Date(`${newEvent.date}T${newEvent.startTime}`);
+      const endDateTime = new Date(`${newEvent.date}T${newEvent.endTime}`);
+
+      await createSchedule({
         title: newEvent.title,
-        description: calendarDescription,
-        date: new Date(newEvent.date),
-        startTime: newEvent.startTime,
-        endTime: newEvent.endTime,
+        description: newEvent.description || undefined,
+        start: startDateTime,
+        end: endDateTime,
+        location: newEvent.location || undefined,
         color: 'blue',
       });
+
+      toast.success(`"${newEvent.title}" 일정이 생성되었습니다.`);
+
+      setNewEvent({
+        title: '',
+        description: '',
+        type: 'offline',
+        date: getTodayDate(),
+        startTime: getCurrentHour(),
+        endTime: getCurrentHourPlus2(),
+        location: '',
+        members: []
+      });
+      setIsEventDialogOpen(false);
     }
   };
 
@@ -198,10 +204,18 @@ export default function GroupPage({ onAddEvent, friends }: GroupPageProps) {
     return events.filter((e) => e.groupId === groupId);
   };
 
-  const handleAddEventFromScheduler = (calendarEvent: CalendarEvent) => {
-    // 캘린더에 일정 추가
-    onAddEvent(calendarEvent);
-    
+  const handleAddEventFromScheduler = async (calendarEvent: CalendarEvent) => {
+    // 캘린더에 일정 추가 (Context를 통해)
+    await createSchedule({
+      title: calendarEvent.title,
+      description: calendarEvent.description || undefined,
+      start: calendarEvent.date,
+      end: calendarEvent.date,
+      color: calendarEvent.color,
+    });
+
+    toast.success(`"${calendarEvent.title}" 일정이 생성되었습니다.`);
+
     // 그룹 이벤트에도 추가
     if (selectedGroup) {
       const groupEvent: GroupEvent = {

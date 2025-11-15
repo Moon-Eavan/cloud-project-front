@@ -7,6 +7,7 @@ import { Toaster } from 'sonner';
 import Dashboard from './pages/Dashboard';
 import MyPage from './pages/MyPage';
 import FriendPage from './features/friends/FriendPage';
+import GroupPage from './features/group/GroupPage';
 import { ImageWithFallback } from './components/common/ImageWithFallback';
 import { MiniCalendar } from './components/common/MiniCalendar';
 
@@ -44,12 +45,7 @@ function AppContent() {
       case 'mypage':
         return <MyPage />;
       case 'groups':
-        return (
-          <div className="p-6">
-            <h2 className="text-gray-900 mb-4">그룹</h2>
-            <p className="text-gray-600">그룹 기능은 준비 중입니다.</p>
-          </div>
-        );
+        return <GroupPage />;
       case 'friends':
         return <FriendPage />;
       default:
