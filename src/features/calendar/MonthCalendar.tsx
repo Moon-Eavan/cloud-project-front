@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Plus, ListTodo } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, ListTodo, X } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../../components/ui/dialog';
 import { Input } from '../../components/ui/input';
@@ -8,6 +8,7 @@ import { Textarea } from '../../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 import { Checkbox } from '../../components/ui/checkbox';
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '../../components/ui/context-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover';
 import { toast } from 'sonner';
 
 import { Schedule } from '../../types';
@@ -260,7 +261,68 @@ export default function MonthCalendar() {
                   );
                 })}
                 {daySchedules.length > 3 && (
-                  <div className="text-xs text-gray-500 px-1.5 py-0.5">+{daySchedules.length - 3} 더보기</div>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        className="text-xs text-blue-500 hover:text-blue-700 px-1.5 py-0.5 hover:bg-blue-50 rounded w-full text-left"
+                        onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                      >
+                        +{daySchedules.length - 3} 더보기
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-64 p-0 shadow-xl border border-gray-200"
+                      onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                    >
+                      <div className="bg-white rounded-lg">
+                        <div className="border-b border-gray-200 p-3">
+                          <div className="flex items-center justify-between">
+                            <h4 className="font-medium text-sm text-gray-900">
+                              {currentDate.getFullYear()}년 {currentDate.getMonth() + 1}월 {dayNumber}일
+                            </h4>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6"
+                              onClick={(e: React.MouseEvent) => {
+                                e.stopPropagation();
+                                handleOpenDialog(new Date(currentDate.getFullYear(), currentDate.getMonth(), dayNumber));
+                              }}
+                            >
+                              <Plus className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="p-2 space-y-1.5 max-h-48 overflow-y-auto">
+                          {daySchedules.map(schedule => {
+                            const colorClass = getColorClass(schedule.color || 'blue');
+                            return (
+                              <button
+                                key={schedule.id}
+                                className={`w-full text-left px-2 py-1.5 rounded-md hover:bg-gray-50 transition-colors ${colorClass.bgLight} ${colorClass.border} border`}
+                                onClick={(e: React.MouseEvent) => {
+                                  e.stopPropagation();
+                                  handleEditSchedule(schedule);
+                                }}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div className={`w-1.5 h-1.5 rounded-full ${colorClass.bg} flex-shrink-0`}></div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className={`text-xs font-medium truncate ${schedule.isCompleted ? 'line-through opacity-50' : colorClass.text}`}>
+                                      {schedule.title}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      {formatTime(schedule.start)} - {formatTime(schedule.end)}
+                                    </div>
+                                  </div>
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 )}
               </div>
             </>
