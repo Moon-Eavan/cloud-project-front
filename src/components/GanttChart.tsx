@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Plus, ChevronRight, ChevronDown, MoreVertical } from 'lucide-react';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
@@ -50,6 +50,72 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
     endDate: '',
   });
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  // 날짜 범위 설정: 오늘부터 -60일 ~ +120일
+  const today = new Date();
+  const chartStart = new Date(today);
+  chartStart.setDate(chartStart.getDate() - 60);
+  chartStart.setHours(0, 0, 0, 0);
+
+  const chartEnd = new Date(today);
+  chartEnd.setDate(chartEnd.getDate() + 120);
+  chartEnd.setHours(23, 59, 59, 999);
+
+  const totalDays = Math.ceil((chartEnd.getTime() - chartStart.getTime()) / (1000 * 60 * 60 * 24));
+  const dayWidth = 40; // 각 날짜당 픽셀 너비
+
+  // 날짜 헤더 생성 (7일 간격)
+  const generateDateHeaders = () => {
+    const headers = [];
+    const current = new Date(chartStart);
+
+    while (current <= chartEnd) {
+      headers.push(new Date(current));
+      current.setDate(current.getDate() + 7);
+    }
+
+    return headers;
+  };
+
+  const dateHeaders = generateDateHeaders();
+
+  // 컴포넌트 마운트시 오늘 날짜 위치로 스크롤
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const daysFromStart = Math.ceil((today.getTime() - chartStart.getTime()) / (1000 * 60 * 60 * 24));
+      const scrollPosition = (daysFromStart - 1) * dayWidth; // 하루 전 위치
+      scrollContainerRef.current.scrollLeft = scrollPosition;
+    }
+  }, []);
+
+  // 드래그 스크롤 핸들러
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!scrollContainerRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // 스크롤 속도 조절
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
   // Parent tasks (tasks without parentTaskId)
   const parentTasks = tasks.filter(task => !task.parentTaskId);
 
@@ -79,7 +145,7 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
     setTasks(tasks.map(task => {
       if (task.id === taskId) {
         const newStatus = task.status === 'done' ? 'todo' : 'done';
-        
+
         // Parent task가 완료/취소되면 모든 subtask도 완료/취소
         if (!task.parentTaskId) {
           const subtasks = getSubtasks(taskId);
@@ -88,7 +154,7 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
           setTasks([...otherTasks, { ...task, status: newStatus }, ...updatedSubtasks]);
           return { ...task, status: newStatus };
         }
-        
+
         return { ...task, status: newStatus };
       }
       return task;
@@ -105,7 +171,7 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
         endDate: new Date(newProject.endDate),
         status: 'todo',
       };
-      
+
       setTasks([...tasks, newTask]);
       setNewProject({ title: '', description: '', startDate: '', endDate: '' });
       setIsProjectDialogOpen(false);
@@ -146,22 +212,6 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
     setTasks(tasks.filter(t => t.id !== taskId));
   };
 
-  const getBarPosition = (startDate: Date, endDate: Date) => {
-    const chartStart = new Date(2025, 10, 1);
-    const chartEnd = new Date(2025, 11, 31);
-    const totalDays = Math.ceil((chartEnd.getTime() - chartStart.getTime()) / (1000 * 60 * 60 * 24));
-    const startOffset = Math.max(
-      0,
-      Math.ceil((startDate.getTime() - chartStart.getTime()) / (1000 * 60 * 60 * 24))
-    );
-    const duration = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-
-    return {
-      left: `${(startOffset / totalDays) * 100}%`,
-      width: `${(duration / totalDays) * 100}%`,
-    };
-  };
-
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -175,7 +225,9 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>새 작업 추가</DialogTitle>
-              <DialogDescription>새로운 작업을 추가합니다.</DialogDescription>
+              <DialogDescription>
+                새로 프로젝트를 생성하고 일정을 설정하세요.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div>
@@ -279,141 +331,195 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
         </DialogContent>
       </Dialog>
 
-      <Card className="p-6 overflow-x-auto bg-white/60 backdrop-blur-sm shadow-lg border border-gray-200 rounded-2xl">
-        <div className="min-w-[800px]">
-          {/* Timeline Header */}
-          <div className="flex mb-4">
-            <div className="w-64 pr-4"></div>
-            <div className="flex-1 flex justify-between text-sm text-gray-700 border-b border-gray-200 pb-3">
-              <span>11월 1일</span>
-              <span>11월 15일</span>
-              <span>12월 1일</span>
-              <span>12월 15일</span>
-              <span>12월 31일</span>
-            </div>
-          </div>
-
-          {/* Projects */}
-          {parentTasks.map((project) => {
-            const subtasks = getSubtasks(project.id);
-            const expanded = isExpanded(project.id);
-            
-            return (
-              <div key={project.id} className="mb-4">
-                <div className="flex items-center mb-2">
-                  <div className="w-64 pr-4 flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-6 w-6 hover:bg-gray-100 rounded-lg"
-                      onClick={() => toggleProject(project.id)}
-                    >
-                      {expanded ? (
-                        <ChevronDown className="w-4 h-4 text-gray-600" />
-                      ) : (
-                        <ChevronRight className="w-4 h-4 text-gray-600" />
-                      )}
-                    </Button>
-                    <span className={`truncate text-gray-900 flex-1 ${project.status === 'done' ? 'line-through opacity-60' : ''}`}>{project.title}</span>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-6 w-6 hover:bg-gray-100 rounded-lg"
-                        >
-                          <MoreVertical className="w-4 h-4 text-gray-600" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => toggleTaskComplete(project.id)}>
-                          {project.status === 'done' ? 'Done 취소' : 'Done으로 변경'}
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteTask(project.id)}
-                          className="text-red-600"
-                        >
-                          삭제
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                  <div className="flex-1 relative h-6">
-                    <div className="absolute inset-0 bg-gray-100 rounded-xl"></div>
+      <Card className="p-6 bg-white/60 backdrop-blur-sm shadow-lg border border-gray-200 rounded-2xl relative">
+        <div
+          className="overflow-x-auto gantt-scrollbar cursor-grab active:cursor-grabbing"
+          ref={scrollContainerRef}
+          onMouseDown={handleMouseDown}
+          onMouseLeave={handleMouseLeave}
+          onMouseUp={handleMouseUp}
+          onMouseMove={handleMouseMove}
+        >
+          <div style={{ minWidth: `${totalDays * dayWidth}px` }}>
+            {/* Timeline Header */}
+            <div className="flex mb-4">
+              <div className="w-64 pr-4 flex-shrink-0 sticky left-0 bg-white/60 backdrop-blur-sm z-10"></div>
+              <div className="relative pt-2" style={{ width: `${totalDays * dayWidth}px` }}>
+                <div className="flex border-b border-gray-200 pb-3">
+                  {dateHeaders.map((date, index) => (
                     <div
-                      className={`absolute h-full rounded-xl shadow-md ${project.status === 'done' ? 'opacity-50' : ''}`}
+                      key={index}
+                      className="text-sm text-gray-700"
                       style={{
-                        ...getBarPosition(project.startDate, project.endDate),
-                        backgroundColor: '#C7E9E4',
-                        boxShadow: '0 4px 6px -1px rgba(199, 233, 228, 0.3)'
+                        minWidth: `${7 * dayWidth}px`,
+                        width: `${7 * dayWidth}px`,
                       }}
-                    ></div>
-                  </div>
+                    >
+                      {date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })}
+                    </div>
+                  ))}
                 </div>
+                {/* 오늘 날짜 표시 */}
+                <div
+                  className="absolute pointer-events-none"
+                  style={{
+                    top: '8px',
+                    bottom: '0px',
+                    left: `${((today.getTime() - chartStart.getTime()) / (1000 * 60 * 60 * 24)) * dayWidth}px`,
+                    transform: 'translateX(-50%)'
+                  }}
+                >
+                  {/* 상단 다이아몬드 */}
+                  <div
+                    className="absolute -top-1 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-500 rotate-45 shadow-sm shadow-blue-500/50"
+                  ></div>
+                  {/* 세로선 */}
+                  <div className="absolute top-0.5 left-1/2 -translate-x-1/2 w-[1px] h-full bg-gradient-to-b from-blue-500 via-blue-400 to-transparent opacity-60"></div>
+                </div>
+              </div>
+            </div>
 
-                {expanded && (
-                  <div className="ml-8">
-                    {subtasks.map((subTask) => (
-                      <div key={subTask.id} className="flex items-center mb-2">
-                        <div className="w-56 pr-4 flex items-center gap-2">
-                          <span className={`text-sm text-gray-700 truncate flex-1 ${subTask.status === 'done' ? 'line-through opacity-60' : ''}`}>{subTask.title}</span>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 hover:bg-gray-100 rounded-lg"
-                              >
-                                <MoreVertical className="w-3 h-3 text-gray-600" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => toggleTaskComplete(subTask.id)}>
-                                {subTask.status === 'done' ? 'Done 취소' : 'Done으로 변경'}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => handleDeleteSubTask(subTask.id)}
-                                className="text-red-600"
-                              >
-                                삭제
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                        <div className="flex-1 relative h-5">
-                          <div className="absolute inset-0 bg-gray-50 rounded-lg"></div>
-                          <div
-                            className={`absolute h-full rounded-lg shadow-md ${subTask.status === 'done' ? 'opacity-50' : ''}`}
-                            style={{
-                              ...getBarPosition(subTask.startDate, subTask.endDate),
-                              backgroundColor: '#B4CEE1',
-                              boxShadow: '0 4px 6px -1px rgba(180, 206, 225, 0.3)'
-                            }}
-                          ></div>
-                        </div>
-                      </div>
-                    ))}
-                    <div className="flex items-center mb-2">
-                      <div className="w-56 pr-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedProjectId(project.id);
-                            setIsSubTaskDialogOpen(true);
-                          }}
-                        >
-                          <Plus className="w-3 h-3 mr-1" />
-                          서브태스크 추가
-                        </Button>
-                      </div>
+            {/* Projects */}
+            {parentTasks.map((project) => {
+              const subtasks = getSubtasks(project.id);
+              const expanded = isExpanded(project.id);
+
+              return (
+                <div key={project.id} className="mb-4">
+                  <div className="flex items-center mb-2">
+                    <div className="w-64 pr-4 flex-shrink-0 sticky left-0 bg-white/60 backdrop-blur-sm z-10 flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 hover:bg-gray-100 rounded-lg"
+                        onClick={() => toggleProject(project.id)}
+                      >
+                        {expanded ? (
+                          <ChevronDown className="w-4 h-4 text-gray-600" />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 text-gray-600" />
+                        )}
+                      </Button>
+                      <span className={`truncate text-gray-900 flex-1 ${project.status === 'done' ? 'line-through opacity-60' : ''}`}>{project.title}</span>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 hover:bg-gray-100 rounded-lg"
+                          >
+                            <MoreVertical className="w-4 h-4 text-gray-600" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => toggleTaskComplete(project.id)}>
+                            {project.status === 'done' ? 'Done 취소' : 'Done으로 변경'}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleDeleteTask(project.id)}
+                            className="text-red-600"
+                          >
+                            삭제
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    <div className="relative h-6 flex-shrink-0" style={{ width: `${totalDays * dayWidth}px` }}>
+                      <div className="absolute inset-0 bg-gray-100 rounded-xl"></div>
+                      <div
+                        className={`absolute h-full rounded-xl shadow-md ${project.status === 'done' ? 'opacity-50' : ''}`}
+                        style={{
+                          left: `${Math.max(0, Math.ceil((project.startDate.getTime() - chartStart.getTime()) / (1000 * 60 * 60 * 24))) * dayWidth}px`,
+                          width: `${Math.ceil((project.endDate.getTime() - project.startDate.getTime()) / (1000 * 60 * 60 * 24)) * dayWidth}px`,
+                          backgroundColor: '#C7E9E4',
+                          boxShadow: '0 4px 6px -1px rgba(199, 233, 228, 0.3)'
+                        }}
+                      ></div>
                     </div>
                   </div>
-                )}
-              </div>
-            );
-          })}
+
+                  {expanded && (
+                    <div className="ml-8">
+                      {subtasks.map((subTask) => (
+                        <div key={subTask.id} className="flex items-center mb-2">
+                          <div className="w-56 pr-4 flex-shrink-0 sticky left-8 bg-white/60 backdrop-blur-sm z-10 flex items-center gap-2">
+                            <span className={`text-sm text-gray-700 truncate flex-1 ${subTask.status === 'done' ? 'line-through opacity-60' : ''}`}>{subTask.title}</span>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-6 w-6 hover:bg-gray-100 rounded-lg"
+                                >
+                                  <MoreVertical className="w-3 h-3 text-gray-600" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => toggleTaskComplete(subTask.id)}>
+                                  {subTask.status === 'done' ? 'Done 취소' : 'Done으로 변경'}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleDeleteSubTask(subTask.id)}
+                                  className="text-red-600"
+                                >
+                                  삭제
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                          <div className="relative h-5 flex-shrink-0" style={{ width: `${totalDays * dayWidth}px` }}>
+                            <div className="absolute inset-0 bg-gray-50 rounded-lg"></div>
+                            <div
+                              className={`absolute h-full rounded-lg shadow-md ${subTask.status === 'done' ? 'opacity-50' : ''}`}
+                              style={{
+                                left: `${Math.max(0, Math.ceil((subTask.startDate.getTime() - chartStart.getTime()) / (1000 * 60 * 60 * 24))) * dayWidth}px`,
+                                width: `${Math.ceil((subTask.endDate.getTime() - subTask.startDate.getTime()) / (1000 * 60 * 60 * 24)) * dayWidth}px`,
+                                backgroundColor: '#B4CEE1',
+                                boxShadow: '0 4px 6px -1px rgba(180, 206, 225, 0.3)'
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      ))}
+                      <div className="flex items-center mb-2">
+                        <div className="w-56 pr-4 flex-shrink-0 sticky left-8 bg-white/60 backdrop-blur-sm z-10">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedProjectId(project.id);
+                              setIsSubTaskDialogOpen(true);
+                            }}
+                          >
+                            <Plus className="w-3 h-3 mr-1" />
+                            서브태스크 추가
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
+
+        <style jsx>{`
+          .gantt-scrollbar::-webkit-scrollbar {
+            height: 8px;
+          }
+          .gantt-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+          }
+          .gantt-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+          }
+          .gantt-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+          }
+        `}</style>
       </Card>
     </div>
   );
