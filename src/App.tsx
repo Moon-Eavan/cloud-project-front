@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, Users, UserPlus, Menu } from 'lucide-react';
+import { Calendar, Users, UserPlus, Menu, User as UserIcon } from 'lucide-react';
 import { Button } from './components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './components/ui/sheet';
 import { Toaster } from 'sonner';
@@ -10,9 +10,11 @@ import FriendPage from './features/friends/FriendPage';
 import GroupPage from './features/group/GroupPage';
 import { ImageWithFallback } from './components/common/ImageWithFallback';
 import { MiniCalendar } from './components/common/MiniCalendar';
+import LoginDialog from './components/auth/LoginDialog';
 
 import { TaskProvider, useTaskContext } from './store/TaskContext';
 import { ScheduleProvider, useScheduleContext } from './store/ScheduleContext';
+import { AuthProvider, useAuth } from './store/AuthContext';
 
 type Page = 'dashboard' | 'mypage' | 'groups' | 'friends';
 
@@ -31,6 +33,8 @@ function DataLoader({ children }: { children: React.ReactNode }) {
 function AppContent() {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const { user, isAuthenticated } = useAuth();
 
   const navigationItems = [
     { id: 'dashboard' as Page, label: '일정', icon: Calendar },
@@ -90,19 +94,39 @@ function AppContent() {
       <div className="border-t border-gray-200 p-4">
         <button
           onClick={() => {
+            if (isAuthenticated) {
             setCurrentPage('mypage');
             setMobileMenuOpen(false);
+            } else {
+              setLoginDialogOpen(true);
+              setMobileMenuOpen(false);
+            }
           }}
           className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors"
         >
+          {isAuthenticated && user?.profileImage ? (
           <ImageWithFallback
-            src="https://images.unsplash.com/photo-1701463387028-3947648f1337?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBhdmF0YXIlMjBwb3J0cmFpdHxlbnwxfHx8fDE3NjI2NjMxMDJ8MA&ixlib=rb-4.1.0&q=80&w=1080"
-            alt="User"
+              src={user.profileImage}
+              alt={user.name}
             className="w-10 h-10 rounded-full object-cover"
           />
+          ) : (
+            <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+              <UserIcon className="w-6 h-6 text-gray-500" />
+            </div>
+          )}
           <div className="flex flex-col items-start text-left flex-1 min-w-0">
-            <span className="text-sm text-gray-900 truncate w-full">User</span>
-            <span className="text-xs text-gray-500 truncate w-full">cloud@khu.ac.kr</span>
+            {isAuthenticated && user ? (
+              <>
+                <span className="text-sm text-gray-900 truncate w-full">{user.name}</span>
+                <span className="text-xs text-gray-500 truncate w-full">{user.email}</span>
+              </>
+            ) : (
+              <>
+                <span className="text-sm text-gray-900 truncate w-full">Guest</span>
+                <span className="text-xs text-gray-500 truncate w-full">로그인이 필요합니다</span>
+              </>
+            )}
           </div>
         </button>
       </div>
@@ -134,12 +158,17 @@ function AppContent() {
           {renderPage()}
         </div>
       </main>
+
+      {!isAuthenticated && (
+        <LoginDialog open={loginDialogOpen} onOpenChange={setLoginDialogOpen} />
+      )}
     </div>
   );
 }
 
 export default function App() {
   return (
+    <AuthProvider>
     <TaskProvider>
       <ScheduleProvider>
         <DataLoader>
@@ -148,5 +177,6 @@ export default function App() {
         </DataLoader>
       </ScheduleProvider>
     </TaskProvider>
+    </AuthProvider>
   );
 }
