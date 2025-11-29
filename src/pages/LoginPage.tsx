@@ -2,13 +2,14 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { authApi } from '@/api/authApi';
+import type { User } from '@/types';
 
 interface LoginPageProps {
-  onLogin: (email: string, password: string) => Promise<any>;
-  onSignup: (name: string, email: string, password: string) => Promise<any>;
+  onLoginSuccess: (user: User, token: string) => void;
 }
 
-export default function LoginPage({ onLogin, onSignup }: LoginPageProps) {
+export default function LoginPage({ onLoginSuccess }: LoginPageProps) {
   const [isSignUp, setIsSignUp] = useState(false);
 
   // Login form
@@ -30,8 +31,12 @@ export default function LoginPage({ onLogin, onSignup }: LoginPageProps) {
     e.preventDefault();
     if (loginEmail && loginPassword) {
       try {
-        await onLogin(loginEmail, loginPassword);
+        const response = await authApi.login({
+          email: loginEmail,
+          password: loginPassword,
+        });
         toast.success('로그인 성공!');
+        onLoginSuccess(response.user, response.token);
       } catch (error: any) {
         toast.error(error.message || '로그인에 실패했습니다.');
       }
@@ -53,8 +58,13 @@ export default function LoginPage({ onLogin, onSignup }: LoginPageProps) {
       setPasswordMatch(true);
 
       try {
-        await onSignup(signUpName, signUpEmail, signUpPassword);
+        const response = await authApi.signup({
+          name: signUpName,
+          email: signUpEmail,
+          password: signUpPassword,
+        });
         toast.success('회원가입 성공!');
+        onLoginSuccess(response.user, response.token);
       } catch (error: any) {
         toast.error(error.message || '회원가입에 실패했습니다.');
       }

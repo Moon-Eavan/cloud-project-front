@@ -1,25 +1,29 @@
-import { useState } from 'react';
-import { Calendar as CalendarIcon, Users, UserPlus, Menu, User } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Calendar as CalendarIcon, Users, UserPlus, Menu } from 'lucide-react';
 import { Button } from './components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './components/ui/sheet';
 import { Checkbox } from './components/ui/checkbox';
 import { ImageWithFallback } from './components/common/ImageWithFallback';
 import { MiniCalendar } from './components/common/MiniCalendar';
-import LoginDialog from './components/common/LoginDialog';
 import NotificationPanel from './components/common/NotificationPanel';
+import { toast } from 'sonner';
 
 // Pages
 import DashboardPage from './pages/DashboardPage';
 import MyPage from './pages/MyPage';
 import GroupsPage from './pages/GroupsPage';
 import FriendsPage from './pages/FriendsPage';
+import LoginPage from './pages/LoginPage';
+
+// API
+import { authApi } from './api/authApi';
 
 // Types
 import type {
   Schedule,
   Task,
   Calendar,
-  CalendarType
+  User,
 } from './types';
 
 type Page = 'dashboard' | 'mypage' | 'groups' | 'friends';
@@ -97,9 +101,9 @@ const initialSchedules: Schedule[] = [
 ];
 
 const initialTasks: Task[] = [
-  { id: '1', title: '프로젝트 기획서 작성', description: '프로젝트 초기 기획서 작성', startDate: new Date(2025, 10, 1), endDate: new Date(2025, 10, 5), status: 'todo' },
-  { id: '2', title: 'UI 디자인', description: '메인 화면 디자인', startDate: new Date(2025, 10, 6), endDate: new Date(2025, 10, 10), status: 'progress' },
-  { id: '3', title: '데이터베이스 설계', description: 'ERD 작성', startDate: new Date(2025, 10, 11), endDate: new Date(2025, 10, 15), status: 'done' },
+  { id: '1', title: '프로젝트 기획서 작성', description: '프로젝트 초기 기획서 작성', startDate: new Date(2025, 10, 1), endDate: new Date(2025, 10, 5), status: 'todo', parentTaskId: null },
+  { id: '2', title: 'UI 디자인', description: '메인 화면 디자인', startDate: new Date(2025, 10, 6), endDate: new Date(2025, 10, 10), status: 'progress', parentTaskId: null },
+  { id: '3', title: '데이터베이스 설계', description: 'ERD 작성', startDate: new Date(2025, 10, 11), endDate: new Date(2025, 10, 15), status: 'done', parentTaskId: null },
 ];
 
 export default function App() {
@@ -109,12 +113,38 @@ export default function App() {
   const [schedules, setSchedules] = useState<Schedule[]>(initialSchedules);
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
-  const [user, setUser] = useState<{ name: string; email: string } | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const addSchedule = (schedule: Schedule) => {
-    setSchedules((prev) => [...prev, schedule]);
-  };
+  // Check if user is already logged in on mount
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      const token = localStorage.getItem('auth_token');
+      const userData = localStorage.getItem('user_data');
+
+      if (token && userData) {
+        try {
+          // Verify token is still valid
+          const currentUser = await authApi.getCurrentUser();
+          if (currentUser) {
+            setUser(currentUser);
+            setIsLoggedIn(true);
+          } else {
+            // Token invalid, clear storage
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_data');
+          }
+        } catch (error) {
+          console.error('Auth check failed:', error);
+          localStorage.removeItem('auth_token');
+          localStorage.removeItem('user_data');
+        }
+      }
+      setIsLoading(false);
+    };
+
+    checkAuthStatus();
+  }, []);
 
   const toggleCalendarVisibility = (calendarId: string) => {
     setCalendars(prev =>
@@ -124,10 +154,22 @@ export default function App() {
     );
   };
 
-  const handleLogout = () => {
-    alert('로그아웃되었습니다.');
-    setIsLoggedIn(false);
-    setUser(null);
+  const handleLogout = async () => {
+    try {
+      await authApi.logout();
+      setIsLoggedIn(false);
+      setUser(null);
+      setCurrentPage('dashboard');
+      toast.success('로그아웃되었습니다.');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      toast.error('로그아웃에 실패했습니다.');
+    }
+  };
+
+  const handleLoginSuccess = (newUser: User) => {
+    setUser(newUser);
+    setIsLoggedIn(true);
   };
 
   const navigationItems = [
@@ -149,7 +191,7 @@ export default function App() {
           />
         );
       case 'mypage':
-        return <MyPage onLogout={handleLogout} />;
+        return <MyPage user={user} onLogout={handleLogout} onUserUpdate={setUser} />;
       case 'groups':
         return <GroupsPage schedules={schedules} setSchedules={setSchedules} />;
       case 'friends':
@@ -233,39 +275,27 @@ export default function App() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => {
-              if (isLoggedIn) {
-                setCurrentPage('mypage');
-                setMobileMenuOpen(false);
-              } else {
-                setLoginDialogOpen(true);
-                setMobileMenuOpen(false);
-              }
+              setCurrentPage('mypage');
+              setMobileMenuOpen(false);
             }}
             className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 transition-colors flex-1 min-w-0"
           >
-            {isLoggedIn ? (
+            {user?.profileImage ? (
               <ImageWithFallback
-                src="https://images.unsplash.com/photo-1701463387028-3947648f1337?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBhdmF0YXIlMjBwb3J0cmFpdHxlbnwxfHx8fDE3NjI2NjMxMDJ8MA&ixlib=rb-4.1.0&q=80&w=1080"
+                src={user.profileImage}
                 alt="User"
                 className="w-10 h-10 rounded-full object-cover flex-shrink-0"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
-                <User className="w-6 h-6 text-gray-500" />
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <span className="text-blue-600 font-semibold text-lg">
+                  {user?.name?.charAt(0) || 'U'}
+                </span>
               </div>
             )}
             <div className="flex flex-col items-start text-left flex-1 min-w-0">
-              {isLoggedIn ? (
-                <>
-                  <span className="text-sm text-gray-900 truncate w-full">{user?.name || 'User'}</span>
-                  <span className="text-[10px] text-gray-500 truncate w-full">{user?.email || 'cloud@khu.ac.kr'}</span>
-                </>
-              ) : (
-                <>
-                  <span className="text-sm text-gray-900 truncate w-full">Guest</span>
-                  <span className="text-[10px] text-gray-500 truncate w-full">로그인이 필요합니다</span>
-                </>
-              )}
+              <span className="text-sm text-gray-900 truncate w-full">{user?.name || 'User'}</span>
+              <span className="text-[10px] text-gray-500 truncate w-full">{user?.email || ''}</span>
             </div>
           </button>
           <NotificationPanel />
@@ -273,6 +303,23 @@ export default function App() {
       </div>
     </div>
   );
+
+  // Show loading spinner while checking auth status
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login page if not logged in
+  if (!isLoggedIn) {
+    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+  }
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -302,17 +349,6 @@ export default function App() {
           {renderPage()}
         </div>
       </main>
-
-      {/* Login Dialog */}
-      <LoginDialog
-        open={loginDialogOpen}
-        onOpenChange={setLoginDialogOpen}
-        onLogin={(name, email) => {
-          setUser({ name, email });
-          setIsLoggedIn(true);
-          setLoginDialogOpen(false);
-        }}
-      />
     </div>
   );
 }
