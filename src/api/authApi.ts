@@ -139,7 +139,26 @@ const realApi = {
 
       return { user, token, ...data };
     } catch (error: any) {
-      const message = error.response?.data?.message || error.response?.data?.error || '로그인에 실패했습니다.';
+      console.error('[authApi.login] 에러 발생:', error);
+      console.error('[authApi.login] error.response:', error.response);
+
+      let message = '로그인에 실패했습니다.';
+
+      if (error.response?.data?.message) {
+        const backendMessage = error.response.data.message;
+        // 사용자 친화적인 메시지로 변환
+        if (backendMessage.includes('User does not exist')) {
+          message = '존재하지 않는 이메일입니다.';
+        } else if (backendMessage.includes('Incorrect username or password')) {
+          message = '이메일 또는 비밀번호가 올바르지 않습니다.';
+        } else {
+          message = backendMessage;
+        }
+      } else if (error.response?.data?.error) {
+        message = error.response.data.error;
+      }
+
+      console.error('[authApi.login] 최종 에러 메시지:', message);
       throw new Error(message);
     }
   },
@@ -175,7 +194,24 @@ const realApi = {
 
       return { user, token, ...responseData };
     } catch (error: any) {
-      const message = error.response?.data?.message || error.response?.data?.error || '회원가입에 실패했습니다.';
+      console.error('[authApi.signup] 에러 발생:', error);
+      console.error('[authApi.signup] error.response:', error.response);
+
+      let message = '회원가입에 실패했습니다.';
+
+      if (error.response?.data?.message) {
+        const backendMessage = error.response.data.message;
+        // 사용자 친화적인 메시지로 변환
+        if (backendMessage.includes('already exists') || backendMessage.includes('이미 존재')) {
+          message = '이미 가입된 이메일입니다.';
+        } else {
+          message = backendMessage;
+        }
+      } else if (error.response?.data?.error) {
+        message = error.response.data.error;
+      }
+
+      console.error('[authApi.signup] 최종 에러 메시지:', message);
       throw new Error(message);
     }
   },

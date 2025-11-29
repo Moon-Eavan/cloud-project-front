@@ -6,7 +6,7 @@ import { Checkbox } from './components/ui/checkbox';
 import { ImageWithFallback } from './components/common/ImageWithFallback';
 import { MiniCalendar } from './components/common/MiniCalendar';
 import NotificationPanel from './components/common/NotificationPanel';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 
 // Pages
 import DashboardPage from './pages/DashboardPage';
@@ -332,6 +332,7 @@ export default function App() {
 
   return (
     <>
+      <Toaster position="top-center" richColors />
       <LoginDialog
         open={loginDialogOpen}
         onOpenChange={setLoginDialogOpen}
