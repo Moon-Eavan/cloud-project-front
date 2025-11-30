@@ -35,22 +35,9 @@ const mapScheduleResponseToSchedule = (response: ScheduleResponse): Schedule => 
       return new Date();
     }
 
-    // Normalize: replace space with 'T' and remove microseconds
-    let normalized = dateTimeStr.replace(' ', 'T');
-
-    // Remove microseconds if present: "2025-12-02T20:00:00.000000" -> "2025-12-02T20:00:00"
-    if (normalized.includes('.')) {
-      normalized = normalized.split('.')[0];
-    }
-
-    // Remove timezone suffix only if present (Z at end, or +/-HH:MM after time)
-    // Match: "2025-12-02T20:00:00Z" or "2025-12-02T20:00:00+09:00"
-    // But preserve: "2025-12-02T20:00:00" (no timezone)
-    const tzPattern = /([+-]\d{2}:\d{2}|Z)$/;
-    const withoutTz = normalized.replace(tzPattern, '');
-
-    // Parse as local time
-    return new Date(withoutTz);
+    // Parse the datetime string as-is from backend
+    // Backend will send the correct local time after fixing LocalDateTime serialization
+    return new Date(dateTimeStr);
   };
 
   return {

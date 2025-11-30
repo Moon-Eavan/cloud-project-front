@@ -3,6 +3,8 @@ import apiClient from './client';
 import type { Calendar, CalendarType } from '@/types';
 import { store } from '@/mocks/mockStore';
 
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 // Backend CategoryResponse type
 interface CategoryResponse {
   categoryId: number;
@@ -78,5 +80,25 @@ export const calendarsApi = {
     }
 
     return calendar;
+  },
+
+  /**
+   * Create a new calendar
+   */
+  async createCalendar(data: { name: string; color: string; icon?: string; groupId?: number }): Promise<Calendar> {
+    try {
+      const requestBody = {
+        name: data.name,
+        color: data.color,
+        icon: data.icon || null,
+        groupId: data.groupId || null,
+      };
+
+      const response = await apiClient.post<CategoryResponse>('/v1/categories', requestBody);
+      return mapCategoryResponseToCalendar(response.data);
+    } catch (error) {
+      console.error('[calendarsApi.createCalendar] Error creating calendar:', error);
+      throw error;
+    }
   },
 };
