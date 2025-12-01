@@ -1,0 +1,3556 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Default module",
+    "description": "",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "Auth"
+    },
+    {
+      "name": "User"
+    },
+    {
+      "name": "Integration"
+    },
+    {
+      "name": "Course"
+    },
+    {
+      "name": "Assignment"
+    },
+    {
+      "name": "Category"
+    },
+    {
+      "name": "Schedule"
+    },
+    {
+      "name": "Todo"
+    }
+  ],
+  "paths": {
+    "/auth/health": {
+      "get": {
+        "summary": "health",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "timestamp": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "service",
+                    "status",
+                    "timestamp"
+                  ]
+                },
+                "example": {
+                  "service": "user-service",
+                  "status": "UP",
+                  "timestamp": 1763708324388
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/signup": {
+      "post": {
+        "summary": "회원가입",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "email": "test@email.com",
+                "password": "testPassword2",
+                "name": "TestUser1"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string"
+                    },
+                    "refreshToken": {
+                      "type": "string"
+                    },
+                    "idToken": {
+                      "type": "string"
+                    },
+                    "expiresIn": {
+                      "type": "integer"
+                    },
+                    "tokenType": {
+                      "type": "string"
+                    },
+                    "cognitoSub": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "accessToken",
+                    "refreshToken",
+                    "idToken",
+                    "expiresIn",
+                    "tokenType",
+                    "cognitoSub",
+                    "email",
+                    "name",
+                    "message"
+                  ]
+                },
+                "example": {
+                  "accessToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjE2NTk2MDFkLTI5OTItNDE0ZC04NTk2LTAzNzQ2MTIwZjYwNCIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjM3MTIyNDIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3QubG9jYWxzdGFjay5jbG91ZDo0NTY2L2FwLW5vcnRoZWFzdC0yX2ZmZjlmZTcyMDA4YTRhZDJiYzI4Mzg0ODlhYTM2YzE5Iiwic3ViIjoiZDJiMGY3ZTUtZDM3ZS00ZGZmLThmNjgtODI0MGJkZTA5ZTA4IiwiYXV0aF90aW1lIjoxNzYzNzA4NjQyLCJpYXQiOjE3NjM3MDg2NDIsImV2ZW50X2lkIjoiMTMxNGY1NDgtNmQ1YS00ZmI0LTkxNGEtZWU4MzA0ZjU1OThiIiwidG9rZW5fdXNlIjoiYWNjZXNzIiwianRpIjoiNjY1YjJiMjItN2ZiMy00NDI4LWE0OWQtNDJiZjI2NmM4OWMwIiwidXNlcm5hbWUiOiJkMmIwZjdlNS1kMzdlLTRkZmYtOGY2OC04MjQwYmRlMDllMDgiLCJjbGllbnRfaWQiOiI4bmZ4a2ZvNDl6dW12Z2Q1dTh4Z2I5azJ5dCIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4ifQ.sJQc13Db7VMVMkOTGCOup_KfRYC0J6FbrC1HDKPDDm16z9bxIN6uHRAYEeN_jCM0RCT8Ejv43NNuCn095TfbROjHcVkWgkld50CFT6q7B5JNJ2yr5tEqAMV21mkmmz-z_fWg03vUBphd1SQ1SOrv2gIaTIyQ5WWaUUt5sqD8PxbtG5Foj_CvOHlsv-GYv_DCq1IpFlowtklJCiB2LOHXpxiRNjMvq4j3OQldCgqlQ-ZnRVnhyEA7GJN6l6njQDHJKYKnIYQBoRpIkMX82nWRekTlAT7PGZ00Y4Z-wpqct7h7BbHaQAgBess3tWvm4ib3vg1prC-r49e56fzMwnGuWw",
+                  "refreshToken": "f5c521cb",
+                  "idToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjE2NTk2MDFkLTI5OTItNDE0ZC04NTk2LTAzNzQ2MTIwZjYwNCIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjM3MTIyNDIsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3QubG9jYWxzdGFjay5jbG91ZDo0NTY2L2FwLW5vcnRoZWFzdC0yX2ZmZjlmZTcyMDA4YTRhZDJiYzI4Mzg0ODlhYTM2YzE5Iiwic3ViIjoiZDJiMGY3ZTUtZDM3ZS00ZGZmLThmNjgtODI0MGJkZTA5ZTA4IiwiYXV0aF90aW1lIjoxNzYzNzA4NjQyLCJpYXQiOjE3NjM3MDg2NDIsImV2ZW50X2lkIjoiMTMxNGY1NDgtNmQ1YS00ZmI0LTkxNGEtZWU4MzA0ZjU1OThiIiwidG9rZW5fdXNlIjoiaWQiLCJqdGkiOiJmNzRiOGYyZS02MzNiLTQ4ODUtOTIwYy0xMjA1MGNhYmZlNTgiLCJjb2duaXRvOnVzZXJuYW1lIjoiZDJiMGY3ZTUtZDM3ZS00ZGZmLThmNjgtODI0MGJkZTA5ZTA4IiwibmFtZSI6IlRlc3RVc2VyMSIsImVtYWlsIjoidGVzdEBlbWFpbC5jb20iLCJjb2duaXRvOnVzZXJfc3RhdHVzIjoiQ09ORklSTUVEIiwiYXVkIjoiOG5meGtmbzQ5enVtdmdkNXU4eGdiOWsyeXQifQ.YTKvXG7UOhRIYqMHLHsMujWj1OUyCduuVVROAB7sq0zvRf-c-1Eh3Gl5IEEN8-LQb__eqr02fr_xV0_kALVEdDeKQRs0Z_Rac5XUtBM8zoepxekA3m9qSlqfmB2km6nKbadMYxlGRA9IhGLr8s2qaOqiU7ojTMjjHWXtCSygj2ouVI7lj6s2J5sVbXyCrLlOwrq2yVsEGuKWfX0Y-CUqpbAR4k_ZEiufOfmJQJSkseoUDHPcLhK1MrwVkqihQKxxPz780zu0A-nGr-9GqkQU4dv72hnjuJpF2MKReXgrYeB8VQ64_4JTyYOjQe1N95273JDqC1_Lc13RDmSwiXfWgQ",
+                  "expiresIn": 3600,
+                  "tokenType": "Bearer",
+                  "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                  "email": "test@email.com",
+                  "name": "TestUser1",
+                  "message": null
+                }
+              }
+            },
+            "headers": {}
+          },
+          "409": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errorCode": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "timestamp": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "errorCode",
+                    "message",
+                    "timestamp"
+                  ]
+                },
+                "example": {
+                  "errorCode": "DUPLICATE_USER",
+                  "message": "이미 존재하는 이메일입니다: test@email.com",
+                  "timestamp": "2025-10-31T08:07:35.533245638"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/signin": {
+      "post": {
+        "summary": "로그인",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "email": "test@email.com",
+                "password": "testPassword2"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string"
+                    },
+                    "refreshToken": {
+                      "type": "string"
+                    },
+                    "idToken": {
+                      "type": "string"
+                    },
+                    "expiresIn": {
+                      "type": "integer"
+                    },
+                    "tokenType": {
+                      "type": "string"
+                    },
+                    "cognitoSub": {
+                      "type": "string"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "accessToken",
+                    "refreshToken",
+                    "idToken",
+                    "expiresIn",
+                    "tokenType",
+                    "cognitoSub",
+                    "email",
+                    "name",
+                    "message"
+                  ]
+                },
+                "examples": {
+                  "1": {
+                    "summary": "Success",
+                    "value": {
+                      "accessToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjE2NTk2MDFkLTI5OTItNDE0ZC04NTk2LTAzNzQ2MTIwZjYwNCIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjM3MTIzODQsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3QubG9jYWxzdGFjay5jbG91ZDo0NTY2L2FwLW5vcnRoZWFzdC0yX2ZmZjlmZTcyMDA4YTRhZDJiYzI4Mzg0ODlhYTM2YzE5Iiwic3ViIjoiZDJiMGY3ZTUtZDM3ZS00ZGZmLThmNjgtODI0MGJkZTA5ZTA4IiwiYXV0aF90aW1lIjoxNzYzNzA4Nzg0LCJpYXQiOjE3NjM3MDg3ODQsImV2ZW50X2lkIjoiYTgxNGE1OTYtYjZiNy00NDQwLWExOWYtNWY1NTY5MDQ4ZjQ4IiwidG9rZW5fdXNlIjoiYWNjZXNzIiwianRpIjoiN2VkMGFmMmQtYjA5ZS00ODdlLTkwMDAtZDhmYjViMmZlNzdlIiwidXNlcm5hbWUiOiJkMmIwZjdlNS1kMzdlLTRkZmYtOGY2OC04MjQwYmRlMDllMDgiLCJjbGllbnRfaWQiOiI4bmZ4a2ZvNDl6dW12Z2Q1dTh4Z2I5azJ5dCIsInNjb3BlIjoiYXdzLmNvZ25pdG8uc2lnbmluLnVzZXIuYWRtaW4ifQ.pABeiF819gs9RPKI4c59wYqiqQYJBLo-6bqOHbxH9A9CES4O_8OdiIaocd965UXZ9d2OQvJwUeby29dY8X-IfMMQvkp306BEg-kcFGSg8VErZt4GALiTnzwpiAroWzqIHCH-EJiikSVlmCQgjBDqYR6xUc5V8E4ijouib04EDXDxImjy7OjA8Ygts1QAhbiztNrrZU7I2WPHiK6JC-A0qklOL0D0FAP6y6V5jO2pQAvoJm2VfBnB0RRE_jbdLB9Sp2WzSWx1GBp6y4-4dIuBLLrZEK9E9LTODyAisBKVh2hr61ZaJqBnQCGNuz2YplxfSHOqSs6yAc726F9ylJcRag",
+                      "refreshToken": "db2a1011",
+                      "idToken": "eyJhbGciOiJSUzI1NiIsImtpZCI6IjE2NTk2MDFkLTI5OTItNDE0ZC04NTk2LTAzNzQ2MTIwZjYwNCIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjM3MTIzODQsImlzcyI6Imh0dHA6Ly9sb2NhbGhvc3QubG9jYWxzdGFjay5jbG91ZDo0NTY2L2FwLW5vcnRoZWFzdC0yX2ZmZjlmZTcyMDA4YTRhZDJiYzI4Mzg0ODlhYTM2YzE5Iiwic3ViIjoiZDJiMGY3ZTUtZDM3ZS00ZGZmLThmNjgtODI0MGJkZTA5ZTA4IiwiYXV0aF90aW1lIjoxNzYzNzA4Nzg0LCJpYXQiOjE3NjM3MDg3ODQsImV2ZW50X2lkIjoiYTgxNGE1OTYtYjZiNy00NDQwLWExOWYtNWY1NTY5MDQ4ZjQ4IiwidG9rZW5fdXNlIjoiaWQiLCJqdGkiOiI0NzVjMmE0Ni1kNWUxLTQ3NjEtYmY1Yi0xOTcxYjM4NDRmMzMiLCJjb2duaXRvOnVzZXJuYW1lIjoiZDJiMGY3ZTUtZDM3ZS00ZGZmLThmNjgtODI0MGJkZTA5ZTA4IiwibmFtZSI6IlRlc3RVc2VyMSIsImVtYWlsIjoidGVzdEBlbWFpbC5jb20iLCJjb2duaXRvOnVzZXJfc3RhdHVzIjoiQ09ORklSTUVEIiwiYXVkIjoiOG5meGtmbzQ5enVtdmdkNXU4eGdiOWsyeXQifQ.e2RRWHxKYmfteoj90PdiKhy1ytNUHP_Y-2AFgYTQwDVERxBtsqci6FitgFIXhmbXqikNQ-MfTngwbBGrCLsDJjnJi5_T9xG6ZINVWok0GHX_AvytRvl7z39EBAB8ed23RJc3SCdC2sdYG1kZnHEfneaAmuRYS8LOuyfsUZacy-nHjAYGztY0zRBdsp0ZqX6Cy-HB97lw2PfBu4NNKZwEXJON-JesK8bKV9ABA_2j3Fhb34kYdxwYqHu4dPNBxQj98HhKFX5byfDMaLY1XKslP2Q3-LB6jxbyZHPsdmcoGg0wjN9lv5LlAs-T3LYyOI9ar1E2ZzpCpA2ysIQbFdXdhA",
+                      "expiresIn": 3600,
+                      "tokenType": "Bearer",
+                      "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                      "email": "test@email.com",
+                      "name": "TestUser1",
+                      "message": null
+                    }
+                  },
+                  "2": {
+                    "summary": "Exception",
+                    "value": {
+                      "errorCode": "INVALID_CREDENTIALS",
+                      "message": "이메일 또는 비밀번호가 일치하지 않습니다",
+                      "timestamp": "2025-10-31T08:11:35.340451751"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {}
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errorCode": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "timestamp": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "errorCode",
+                    "message",
+                    "timestamp"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/integrations/canvas/credentials": {
+      "post": {
+        "summary": "Canvas  토큰 등록",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Integration"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "canvasToken": "{{canvas_api_token}}"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "Canvas 토큰 조회",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Integration"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "canvasToken": {
+                      "type": "string"
+                    },
+                    "lastValidatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "canvasToken",
+                    "lastValidatedAt"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/integrations/status": {
+      "get": {
+        "summary": "외부 연동 상태 조회",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Integration"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "canvas": {
+                      "type": "object",
+                      "properties": {
+                        "isConnected": {
+                          "type": "boolean"
+                        },
+                        "externalUsername": {
+                          "type": "string"
+                        },
+                        "lastValidatedAt": {
+                          "type": "string"
+                        },
+                        "lastSyncedAt": {
+                          "type": "null"
+                        }
+                      },
+                      "required": [
+                        "isConnected",
+                        "externalUsername",
+                        "lastValidatedAt",
+                        "lastSyncedAt"
+                      ]
+                    },
+                    "googleCalendar": {
+                      "type": "null"
+                    },
+                    "outlook": {
+                      "type": "null"
+                    }
+                  },
+                  "required": [
+                    "canvas",
+                    "googleCalendar",
+                    "outlook"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/integrations/canvas/sync": {
+      "post": {
+        "summary": "과제 목록 수동 동기화",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Integration"
+        ],
+        "parameters": [
+          {
+            "name": "mode",
+            "in": "query",
+            "description": "",
+            "required": false,
+            "example": "assignments",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "coursesCount": {
+                      "type": "integer"
+                    },
+                    "assignmentsCount": {
+                      "type": "integer"
+                    },
+                    "syncedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "message",
+                    "coursesCount",
+                    "assignmentsCount",
+                    "syncedAt"
+                  ]
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/users/me": {
+      "get": {
+        "summary": "내 정보 조회",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "User"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "userId": {
+                      "type": "integer"
+                    },
+                    "email": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "cognitoSub": {
+                      "type": "string"
+                    },
+                    "isActive": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "userId",
+                    "email",
+                    "name",
+                    "cognitoSub",
+                    "isActive",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                },
+                "examples": {
+                  "2": {
+                    "summary": "Success",
+                    "value": {
+                      "userId": 1,
+                      "email": "test@email.com",
+                      "name": "TestUser1",
+                      "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                      "isActive": true,
+                      "createdAt": "2025-11-21T07:04:02.050609",
+                      "updatedAt": "2025-11-21T07:04:02.05071"
+                    }
+                  },
+                  "3": {
+                    "summary": "Success",
+                    "value": {
+                      "userId": 1,
+                      "email": "test@email.com",
+                      "name": "TestUser1",
+                      "cognitoSub": "c6fe83d2-c0cc-411e-9698-2ae05a7671b8",
+                      "isActive": true,
+                      "createdAt": "2025-11-10T01:01:32.27299",
+                      "updatedAt": "2025-11-10T01:01:32.27299"
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {}
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ]
+                },
+                "example": {
+                  "error": "Authorization 헤더가 필요합니다"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/courses": {
+      "get": {
+        "summary": "강의 목록 조회",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Course"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "canvasCourseId": {
+                        "type": "integer"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "courseCode": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "null"
+                      },
+                      "startAt": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "endAt": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "canvasCourseId",
+                      "name",
+                      "courseCode",
+                      "description",
+                      "startAt",
+                      "endAt",
+                      "createdAt",
+                      "updatedAt"
+                    ]
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/courses/1": {
+      "get": {
+        "summary": "강의 세부 정보 조회",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Course"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "canvasCourseId": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "courseCode": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "null"
+                    },
+                    "startAt": {
+                      "type": "string"
+                    },
+                    "endAt": {
+                      "type": "string"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "canvasCourseId",
+                    "name",
+                    "courseCode",
+                    "description",
+                    "startAt",
+                    "endAt",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                },
+                "example": {
+                  "id": 1,
+                  "canvasCourseId": 26892,
+                  "name": " [2021-2] 4차 학습법특강: 온라인 tool을 활용한 효과적 협업 기술",
+                  "courseCode": " [2021-2] 학습법특강",
+                  "description": null,
+                  "startAt": "2021-11-23T15:00:00",
+                  "endAt": "2021-12-26T14:59:00",
+                  "createdAt": "2025-11-07T15:11:50.403172",
+                  "updatedAt": "2025-11-07T15:11:50.403204"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/enrollments": {
+      "get": {
+        "summary": "강의 목록 조회 (동기화 활성화 여부 포함)",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Course"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "cognitoSub": {
+                        "type": "string"
+                      },
+                      "course": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "canvasCourseId": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "courseCode": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "null"
+                          },
+                          "startAt": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "endAt": {
+                            "type": "string",
+                            "nullable": true
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "updatedAt": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "canvasCourseId",
+                          "name",
+                          "courseCode",
+                          "description",
+                          "startAt",
+                          "endAt",
+                          "createdAt",
+                          "updatedAt"
+                        ]
+                      },
+                      "isSyncLeader": {
+                        "type": "boolean"
+                      },
+                      "isSyncEnabled": {
+                        "type": "boolean"
+                      },
+                      "enrolledAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "cognitoSub",
+                      "course",
+                      "isSyncLeader",
+                      "isSyncEnabled",
+                      "enrolledAt"
+                    ]
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 1,
+                      "canvasCourseId": 26892,
+                      "name": " [2021-2] 4차 학습법특강: 온라인 tool을 활용한 효과적 협업 기술",
+                      "courseCode": " [2021-2] 학습법특강",
+                      "description": null,
+                      "startAt": "2021-11-23T15:00:00",
+                      "endAt": "2021-12-26T14:59:00",
+                      "createdAt": "2025-11-30T17:28:43.251266",
+                      "updatedAt": "2025-11-30T17:28:43.251272"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.25325"
+                  },
+                  {
+                    "id": 2,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 2,
+                      "canvasCourseId": 26834,
+                      "name": "[2021-2 서울] 학습법 특강 2차: 한글/워드를 활용한 보고서 작성 노하우",
+                      "courseCode": "학습법 특강",
+                      "description": null,
+                      "startAt": "2021-10-26T15:00:00",
+                      "endAt": "2021-11-28T14:59:00",
+                      "createdAt": "2025-11-30T17:28:43.253945",
+                      "updatedAt": "2025-11-30T17:28:43.253945"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.254757"
+                  },
+                  {
+                    "id": 3,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 3,
+                      "canvasCourseId": 26900,
+                      "name": "[2021-2] 5차 학습법특강: 실무 엑셀의 이해",
+                      "courseCode": "[2021-2] 학습법특강",
+                      "description": null,
+                      "startAt": "2021-12-05T15:00:00",
+                      "endAt": "2022-01-08T15:00:00",
+                      "createdAt": "2025-11-30T17:28:43.255409",
+                      "updatedAt": "2025-11-30T17:28:43.255409"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.256168"
+                  },
+                  {
+                    "id": 4,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 4,
+                      "canvasCourseId": 71213,
+                      "name": "[2024-2] 슬기로운 경희생활 상담편",
+                      "courseCode": "[2024-2] 슬기로운 경희생활 상담편",
+                      "description": null,
+                      "startAt": "2024-10-23T05:14:47",
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.256952",
+                      "updatedAt": "2025-11-30T17:28:43.256953"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.257849"
+                  },
+                  {
+                    "id": 5,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 5,
+                      "canvasCourseId": 71239,
+                      "name": "[2024-2] 슬기로운 경희생활: 장학금편",
+                      "courseCode": "[2024-2] 슬기로운 경희생활: 장학금편",
+                      "description": null,
+                      "startAt": "2024-11-13T01:54:28",
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.258596",
+                      "updatedAt": "2025-11-30T17:28:43.258596"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.259386"
+                  },
+                  {
+                    "id": 6,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 6,
+                      "canvasCourseId": 71238,
+                      "name": "[2024-2] 슬기로운 경희생활: 학부연구생편",
+                      "courseCode": "[2024-2] 슬기로운 경희생활: 학부연구생편",
+                      "description": null,
+                      "startAt": "2024-11-08T01:37:00",
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.259994",
+                      "updatedAt": "2025-11-30T17:28:43.259994"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.260772"
+                  },
+                  {
+                    "id": 7,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 7,
+                      "canvasCourseId": 71208,
+                      "name": "[2024-2] 재학생 대상 스마트폰 과의존 예방 교육 [법정의무교육]",
+                      "courseCode": "[2024-2] 재학생 대상 스마트폰 과의존 예방 교육 [법정의무교육]",
+                      "description": null,
+                      "startAt": "2024-10-03T15:00:00",
+                      "endAt": "2024-12-12T15:00:00",
+                      "createdAt": "2025-11-30T17:28:43.261401",
+                      "updatedAt": "2025-11-30T17:28:43.261402"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.262114"
+                  },
+                  {
+                    "id": 8,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 8,
+                      "canvasCourseId": 63688,
+                      "name": "[2024-국제] 학습 전략 상담 클리닉",
+                      "courseCode": "[2024-국제] 학습 전략 상담 클리닉",
+                      "description": null,
+                      "startAt": "2024-03-26T05:01:45",
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.262723",
+                      "updatedAt": "2025-11-30T17:28:43.262723"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.263653"
+                  },
+                  {
+                    "id": 9,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 9,
+                      "canvasCourseId": 63132,
+                      "name": "[법정의무교육] 2024학년도 재학생 폭력예방교육",
+                      "courseCode": "[법정의무교육] 2024학년도 재학생 폭력예방교육",
+                      "description": null,
+                      "startAt": "2024-03-14T05:01:00",
+                      "endAt": "2025-02-27T15:00:00",
+                      "createdAt": "2025-11-30T17:28:43.264145",
+                      "updatedAt": "2025-11-30T17:28:43.264146"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.264948"
+                  },
+                  {
+                    "id": 10,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 10,
+                      "canvasCourseId": 78882,
+                      "name": "[법정의무교육] 2025학년도 재학생 폭력예방교육",
+                      "courseCode": "[법정의무교육] 2025학년도 재학생 폭력예방교육",
+                      "description": null,
+                      "startAt": "2025-04-07T04:16:50",
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.265482",
+                      "updatedAt": "2025-11-30T17:28:43.265482"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.26613"
+                  },
+                  {
+                    "id": 11,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 11,
+                      "canvasCourseId": 78889,
+                      "name": "2025학년도 재학생 대상 스마트폰 과의존 예방 교육 [법정의무교육]",
+                      "courseCode": "2025학년도 재학생 대상 스마트폰 과의존 예방 교육 [법정의무교육]",
+                      "description": null,
+                      "startAt": "2025-03-16T15:00:00",
+                      "endAt": "2025-06-27T15:00:00",
+                      "createdAt": "2025-11-30T17:28:43.266653",
+                      "updatedAt": "2025-11-30T17:28:43.266653"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.267469"
+                  },
+                  {
+                    "id": 12,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 12,
+                      "canvasCourseId": 13541,
+                      "name": "물리학및실험1 15분반",
+                      "courseCode": "물리학및실험1 15분반",
+                      "description": null,
+                      "startAt": null,
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.268053",
+                      "updatedAt": "2025-11-30T17:28:43.268054"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.268671"
+                  },
+                  {
+                    "id": 13,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 13,
+                      "canvasCourseId": 13449,
+                      "name": "미분적분학 17분반",
+                      "courseCode": "미분적분학 17분반",
+                      "description": null,
+                      "startAt": null,
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.269227",
+                      "updatedAt": "2025-11-30T17:28:43.269228"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.269933"
+                  },
+                  {
+                    "id": 14,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 14,
+                      "canvasCourseId": 82326,
+                      "name": "사물인터넷과미래사회 G01분반",
+                      "courseCode": "사물인터넷과미래사회 G01분반",
+                      "description": null,
+                      "startAt": null,
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.270468",
+                      "updatedAt": "2025-11-30T17:28:43.270468"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.271164"
+                  },
+                  {
+                    "id": 15,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 15,
+                      "canvasCourseId": 13429,
+                      "name": "선형대수 12분반",
+                      "courseCode": "선형대수 12분반",
+                      "description": null,
+                      "startAt": null,
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.271704",
+                      "updatedAt": "2025-11-30T17:28:43.271704"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.272392"
+                  },
+                  {
+                    "id": 16,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 16,
+                      "canvasCourseId": 15608,
+                      "name": "성찰과표현 G29분반",
+                      "courseCode": "성찰과표현 G29분반",
+                      "description": null,
+                      "startAt": null,
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.272932",
+                      "updatedAt": "2025-11-30T17:28:43.272933"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.273807"
+                  },
+                  {
+                    "id": 17,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 17,
+                      "canvasCourseId": 15475,
+                      "name": "세계와시민 G41분반",
+                      "courseCode": "세계와시민 G41분반",
+                      "description": null,
+                      "startAt": null,
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.27442",
+                      "updatedAt": "2025-11-30T17:28:43.27442"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.275039"
+                  },
+                  {
+                    "id": 18,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 18,
+                      "canvasCourseId": 80210,
+                      "name": "알고리즘 00분반",
+                      "courseCode": "알고리즘 00분반",
+                      "description": null,
+                      "startAt": null,
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.27574",
+                      "updatedAt": "2025-11-30T17:28:43.275741"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.276569"
+                  },
+                  {
+                    "id": 19,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 19,
+                      "canvasCourseId": 80204,
+                      "name": "운영체제 00분반",
+                      "courseCode": "운영체제 00분반",
+                      "description": null,
+                      "startAt": null,
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.277157",
+                      "updatedAt": "2025-11-30T17:28:43.277157"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.277917"
+                  },
+                  {
+                    "id": 20,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 20,
+                      "canvasCourseId": 15350,
+                      "name": "인간의가치탐색 G35분반",
+                      "courseCode": "인간의가치탐색 G35분반",
+                      "description": null,
+                      "startAt": null,
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.278659",
+                      "updatedAt": "2025-11-30T17:28:43.278659"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.279408"
+                  },
+                  {
+                    "id": 21,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 21,
+                      "canvasCourseId": 85063,
+                      "name": "최신기술콜로키움2 00분반",
+                      "courseCode": "최신기술콜로키움2 00분반",
+                      "description": null,
+                      "startAt": null,
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.279957",
+                      "updatedAt": "2025-11-30T17:28:43.279958"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.280707"
+                  },
+                  {
+                    "id": 22,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 22,
+                      "canvasCourseId": 80223,
+                      "name": "캡스톤디자인 00분반",
+                      "courseCode": "캡스톤디자인 00분반",
+                      "description": null,
+                      "startAt": null,
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.281223",
+                      "updatedAt": "2025-11-30T17:28:43.281223"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.281763"
+                  },
+                  {
+                    "id": 23,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 23,
+                      "canvasCourseId": 80237,
+                      "name": "클라우드프로젝트 00분반",
+                      "courseCode": "클라우드프로젝트 00분반",
+                      "description": null,
+                      "startAt": null,
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.282287",
+                      "updatedAt": "2025-11-30T17:28:43.282287"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.283225"
+                  },
+                  {
+                    "id": 24,
+                    "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                    "course": {
+                      "id": 24,
+                      "canvasCourseId": 85076,
+                      "name": "풀스택서비스프로그래밍 00분반",
+                      "courseCode": "풀스택서비스프로그래밍 00분반",
+                      "description": null,
+                      "startAt": null,
+                      "endAt": null,
+                      "createdAt": "2025-11-30T17:28:43.284178",
+                      "updatedAt": "2025-11-30T17:28:43.284178"
+                    },
+                    "isSyncLeader": true,
+                    "isSyncEnabled": true,
+                    "enrolledAt": "2025-11-30T17:28:43.285058"
+                  }
+                ]
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/enrollments/{enrollmentId}/sync": {
+      "put": {
+        "summary": "특정 과목의 일정 동기화 해제",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Course"
+        ],
+        "parameters": [
+          {
+            "name": "enrollmentId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "example": "13",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "isSyncEnabled": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "cognitoSub": {
+                      "type": "string"
+                    },
+                    "course": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "canvasCourseId": {
+                          "type": "integer"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "courseCode": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "null"
+                        },
+                        "startAt": {
+                          "type": "string"
+                        },
+                        "endAt": {
+                          "type": "null"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "updatedAt": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "canvasCourseId",
+                        "name",
+                        "courseCode",
+                        "description",
+                        "startAt",
+                        "endAt",
+                        "createdAt",
+                        "updatedAt"
+                      ]
+                    },
+                    "isSyncLeader": {
+                      "type": "boolean"
+                    },
+                    "isSyncEnabled": {
+                      "type": "boolean"
+                    },
+                    "enrolledAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "cognitoSub",
+                    "course",
+                    "isSyncLeader",
+                    "isSyncEnabled",
+                    "enrolledAt"
+                  ]
+                },
+                "example": {
+                  "id": 6,
+                  "cognitoSub": "166051de-510a-47f3-8d7b-215e7d7bb487",
+                  "course": {
+                    "id": 6,
+                    "canvasCourseId": 71238,
+                    "name": "[2024-2] 슬기로운 경희생활: 학부연구생편",
+                    "courseCode": "[2024-2] 슬기로운 경희생활: 학부연구생편",
+                    "description": null,
+                    "startAt": "2024-11-08T01:37:00",
+                    "endAt": null,
+                    "createdAt": "2025-11-30T17:28:43.259994",
+                    "updatedAt": "2025-11-30T17:28:43.259994"
+                  },
+                  "isSyncLeader": true,
+                  "isSyncEnabled": false,
+                  "enrolledAt": "2025-11-30T17:28:43.260772"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/courses/1/assignments": {
+      "get": {
+        "summary": "특정 수업의 과제 목록 조회",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Assignment"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "canvasAssignmentId": {
+                        "type": "integer"
+                      },
+                      "courseId": {
+                        "type": "integer"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "dueAt": {
+                        "type": "string"
+                      },
+                      "pointsPossible": {
+                        "type": "integer"
+                      },
+                      "submissionTypes": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "canvasAssignmentId",
+                      "courseId",
+                      "title",
+                      "description",
+                      "dueAt",
+                      "pointsPossible",
+                      "submissionTypes",
+                      "createdAt",
+                      "updatedAt"
+                    ]
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "canvasAssignmentId": 709556,
+                    "courseId": 1,
+                    "title": "1_메타버스패러다임과게더타운_1",
+                    "description": "<p>﻿</p><p>강의자료 파일은 공지사항에 있습니다 :)</p>",
+                    "dueAt": "2021-12-26T14:59:59",
+                    "pointsPossible": 1,
+                    "submissionTypes": "external_tool",
+                    "createdAt": "2025-11-07T15:12:00",
+                    "updatedAt": "2025-11-07T15:12:00"
+                  },
+                  {
+                    "id": 2,
+                    "canvasAssignmentId": 709570,
+                    "courseId": 1,
+                    "title": "4_효과적팀플을위한온라인툴활용법_1",
+                    "description": "<p>﻿</p><p>강의자료 파일은 공지사항에 있습니다 :)</p>",
+                    "dueAt": "2021-12-26T14:59:59",
+                    "pointsPossible": 1,
+                    "submissionTypes": "external_tool",
+                    "createdAt": "2025-11-07T15:12:00",
+                    "updatedAt": "2025-11-07T15:12:00"
+                  },
+                  {
+                    "id": 3,
+                    "canvasAssignmentId": 709574,
+                    "courseId": 1,
+                    "title": "5_효과적팀플을위한온라인툴활용법_2",
+                    "description": "<p>﻿</p><p>강의자료 파일은 공지사항에 있습니다 :)</p>",
+                    "dueAt": "2021-12-26T14:59:59",
+                    "pointsPossible": 1,
+                    "submissionTypes": "external_tool",
+                    "createdAt": "2025-11-07T15:12:00",
+                    "updatedAt": "2025-11-07T15:12:00"
+                  },
+                  {
+                    "id": 4,
+                    "canvasAssignmentId": 709567,
+                    "courseId": 1,
+                    "title": "3_메타버스패러다임과게더타운_3",
+                    "description": "<p>﻿</p><p>강의자료 파일은 공지사항에 있습니다 :)</p>",
+                    "dueAt": "2021-12-26T14:59:59",
+                    "pointsPossible": 1,
+                    "submissionTypes": "external_tool",
+                    "createdAt": "2025-11-07T15:12:00",
+                    "updatedAt": "2025-11-07T15:12:00"
+                  },
+                  {
+                    "id": 5,
+                    "canvasAssignmentId": 709563,
+                    "courseId": 1,
+                    "title": "2_메타버스패러다임과게더타운_2",
+                    "description": "<p>﻿</p><p>강의자료 파일은 공지사항에 있습니다 :)</p>",
+                    "dueAt": "2021-12-26T14:59:59",
+                    "pointsPossible": 1,
+                    "submissionTypes": "external_tool",
+                    "createdAt": "2025-11-07T15:12:00",
+                    "updatedAt": "2025-11-07T15:12:00"
+                  }
+                ]
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/categories": {
+      "post": {
+        "summary": "그룹 카테고리 생성",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Category"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "name": "category2",
+                "color": "#F48ffB",
+                "icon": null,
+                "groupId": 9007199254740991
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "categoryId": {
+                      "type": "integer"
+                    },
+                    "cognitoSub": {
+                      "type": "string"
+                    },
+                    "groupId": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "color": {
+                      "type": "string"
+                    },
+                    "icon": {
+                      "type": "null"
+                    },
+                    "isDefault": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "categoryId",
+                    "cognitoSub",
+                    "groupId",
+                    "name",
+                    "color",
+                    "icon",
+                    "isDefault",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                },
+                "example": {
+                  "categoryId": 3,
+                  "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                  "groupId": 9007199254740991,
+                  "name": "category2",
+                  "color": "#F48ffB",
+                  "icon": null,
+                  "isDefault": false,
+                  "createdAt": "2025-11-21T07:36:50.093603",
+                  "updatedAt": "2025-11-21T07:36:50.09366"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "카테고리 목록 조회",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Category"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "categoryId": {
+                        "type": "integer"
+                      },
+                      "cognitoSub": {
+                        "type": "string"
+                      },
+                      "groupId": {
+                        "type": "null"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "color": {
+                        "type": "string"
+                      },
+                      "icon": {
+                        "type": "string"
+                      },
+                      "isDefault": {
+                        "type": "boolean"
+                      },
+                      "sourceType": {
+                        "type": "string"
+                      },
+                      "sourceId": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "categoryId",
+                      "cognitoSub",
+                      "groupId",
+                      "name",
+                      "color",
+                      "icon",
+                      "isDefault",
+                      "sourceType",
+                      "sourceId",
+                      "createdAt",
+                      "updatedAt"
+                    ]
+                  }
+                },
+                "example": [
+                  {
+                    "categoryId": 3,
+                    "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                    "groupId": 9007199254740991,
+                    "name": "카테고리1",
+                    "color": "#53174f",
+                    "icon": null,
+                    "isDefault": false,
+                    "createdAt": "2025-11-21T07:36:50.093603",
+                    "updatedAt": "2025-11-21T07:42:48.281162"
+                  },
+                  {
+                    "categoryId": 4,
+                    "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                    "groupId": null,
+                    "name": "캡스톤디자인",
+                    "color": "#32CcF3",
+                    "icon": null,
+                    "isDefault": false,
+                    "createdAt": "2025-11-21T07:55:25.318903",
+                    "updatedAt": "2025-11-21T07:55:25.318973"
+                  }
+                ]
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/categories/3": {
+      "get": {
+        "summary": "카테고리 상세 조회",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Category"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "categoryId": {
+                      "type": "integer"
+                    },
+                    "cognitoSub": {
+                      "type": "string"
+                    },
+                    "groupId": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "color": {
+                      "type": "string"
+                    },
+                    "icon": {
+                      "type": "null"
+                    },
+                    "isDefault": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "categoryId",
+                    "cognitoSub",
+                    "groupId",
+                    "name",
+                    "color",
+                    "icon",
+                    "isDefault",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                },
+                "example": {
+                  "categoryId": 1,
+                  "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                  "groupId": null,
+                  "name": "카테고리1",
+                  "color": "#32CcF3",
+                  "icon": null,
+                  "isDefault": false,
+                  "createdAt": "2025-11-21T07:09:12.720392",
+                  "updatedAt": "2025-11-21T07:09:12.721002"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "카테고리 수정",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Category"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "name": "카테고리1",
+                "color": "#53174f",
+                "icon": null,
+                "groupId": 9007199254740991
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "categoryId": {
+                      "type": "integer"
+                    },
+                    "cognitoSub": {
+                      "type": "string"
+                    },
+                    "groupId": {
+                      "type": "integer"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "color": {
+                      "type": "string"
+                    },
+                    "icon": {
+                      "type": "null"
+                    },
+                    "isDefault": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "categoryId",
+                    "cognitoSub",
+                    "groupId",
+                    "name",
+                    "color",
+                    "icon",
+                    "isDefault",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                },
+                "example": {
+                  "categoryId": 3,
+                  "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                  "groupId": 9007199254740991,
+                  "name": "카테고리1",
+                  "color": "#53174f",
+                  "icon": null,
+                  "isDefault": false,
+                  "createdAt": "2025-11-21T07:36:50.093603",
+                  "updatedAt": "2025-11-21T07:36:50.09366"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/categories/1": {
+      "delete": {
+        "summary": "카테고리 삭제",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Category"
+        ],
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/schedules": {
+      "post": {
+        "summary": "일정 생성",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Schedule"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "title": "일정2",
+                "description": "캡스톤디자인",
+                "location": "혜윰",
+                "startTime": "2025-11-09T16:49:31.583Z",
+                "endTime": "2025-11-09T16:49:31.583Z",
+                "isAllDay": true,
+                "categoryId": 4,
+                "groupId": null,
+                "recurrenceRule": null,
+                "source": null,
+                "sourceId": null
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "scheduleId": {
+                      "type": "integer"
+                    },
+                    "cognitoSub": {
+                      "type": "string"
+                    },
+                    "groupId": {
+                      "type": "null"
+                    },
+                    "categoryId": {
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "startTime": {
+                      "type": "string"
+                    },
+                    "endTime": {
+                      "type": "string"
+                    },
+                    "isAllDay": {
+                      "type": "boolean"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "recurrenceRule": {
+                      "type": "null"
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "sourceId": {
+                      "type": "null"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "scheduleId",
+                    "cognitoSub",
+                    "groupId",
+                    "categoryId",
+                    "title",
+                    "description",
+                    "location",
+                    "startTime",
+                    "endTime",
+                    "isAllDay",
+                    "status",
+                    "recurrenceRule",
+                    "source",
+                    "sourceId",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                },
+                "example": {
+                  "scheduleId": 2,
+                  "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                  "groupId": null,
+                  "categoryId": 4,
+                  "title": "일정2",
+                  "description": "캡스톤디자인",
+                  "location": "혜윰",
+                  "startTime": "2025-11-09T16:49:31.583",
+                  "endTime": "2025-11-09T16:49:31.583",
+                  "isAllDay": true,
+                  "status": "TODO",
+                  "recurrenceRule": null,
+                  "source": "USER",
+                  "sourceId": null,
+                  "createdAt": "2025-11-21T07:58:02.068541",
+                  "updatedAt": "2025-11-21T07:58:02.068563"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "일정 목록 조회",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Schedule"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "scheduleId": {
+                        "type": "integer"
+                      },
+                      "cognitoSub": {
+                        "type": "string"
+                      },
+                      "groupId": {
+                        "type": "null"
+                      },
+                      "categoryId": {
+                        "type": "integer"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "location": {
+                        "type": "null"
+                      },
+                      "startTime": {
+                        "type": "string"
+                      },
+                      "endTime": {
+                        "type": "string"
+                      },
+                      "isAllDay": {
+                        "type": "boolean"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "recurrenceRule": {
+                        "type": "null"
+                      },
+                      "source": {
+                        "type": "string"
+                      },
+                      "sourceId": {
+                        "type": "string"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "scheduleId",
+                      "cognitoSub",
+                      "groupId",
+                      "categoryId",
+                      "title",
+                      "description",
+                      "location",
+                      "startTime",
+                      "endTime",
+                      "isAllDay",
+                      "status",
+                      "recurrenceRule",
+                      "source",
+                      "sourceId",
+                      "createdAt",
+                      "updatedAt"
+                    ]
+                  }
+                },
+                "example": [
+                  {
+                    "scheduleId": 1,
+                    "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                    "groupId": 9007199254740991,
+                    "categoryId": 3,
+                    "title": "일정1",
+                    "description": "클라우드프로젝트",
+                    "location": "카페 칸나",
+                    "startTime": "2025-11-09T16:49:31.583",
+                    "endTime": "2025-11-09T16:49:31.583",
+                    "isAllDay": true,
+                    "status": "TODO",
+                    "recurrenceRule": null,
+                    "source": "USER",
+                    "sourceId": null,
+                    "createdAt": "2025-11-21T07:47:13.662877",
+                    "updatedAt": "2025-11-21T07:47:13.662919"
+                  }
+                ]
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/schedules/1/status": {
+      "patch": {
+        "summary": "일정 상태 변경",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Schedule"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string",
+                    "enum": [
+                      "TODO",
+                      "IN_PROGRESS",
+                      "DONE"
+                    ]
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              },
+              "example": {
+                "status": "DONE"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "scheduleId": {
+                      "type": "integer"
+                    },
+                    "cognitoSub": {
+                      "type": "string"
+                    },
+                    "groupId": {
+                      "type": "integer"
+                    },
+                    "categoryId": {
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "startTime": {
+                      "type": "string"
+                    },
+                    "endTime": {
+                      "type": "string"
+                    },
+                    "isAllDay": {
+                      "type": "boolean"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "recurrenceRule": {
+                      "type": "null"
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "sourceId": {
+                      "type": "null"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "scheduleId",
+                    "cognitoSub",
+                    "groupId",
+                    "categoryId",
+                    "title",
+                    "description",
+                    "location",
+                    "startTime",
+                    "endTime",
+                    "isAllDay",
+                    "status",
+                    "recurrenceRule",
+                    "source",
+                    "sourceId",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                },
+                "example": {
+                  "scheduleId": 1,
+                  "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                  "groupId": 9007199254740991,
+                  "categoryId": 3,
+                  "title": "일정1",
+                  "description": "클라우드프로젝트 백엔드",
+                  "location": "카페 칸나",
+                  "startTime": "2025-11-09T16:49:31.583",
+                  "endTime": "2025-11-09T20:49:31.583",
+                  "isAllDay": false,
+                  "status": "DONE",
+                  "recurrenceRule": null,
+                  "source": "USER",
+                  "sourceId": null,
+                  "createdAt": "2025-11-21T07:47:13.662877",
+                  "updatedAt": "2025-11-21T08:09:24.361884"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/schedules/1": {
+      "put": {
+        "summary": "일정 수정",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Schedule"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "title": "일정1",
+                "description": "클라우드프로젝트 백엔드",
+                "location": "카페 칸나",
+                "startTime": "2025-11-09T16:49:31.583Z",
+                "endTime": "2025-11-09T20:49:31.583Z",
+                "isAllDay": false,
+                "categoryId": 3,
+                "groupId": 9007199254740991,
+                "recurrenceRule": null,
+                "source": null,
+                "sourceId": null
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                },
+                "example": {
+                  "scheduleId": 1,
+                  "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                  "groupId": 9007199254740991,
+                  "categoryId": 3,
+                  "title": "일정1",
+                  "description": "클라우드프로젝트 백엔드",
+                  "location": "카페 칸나",
+                  "startTime": "2025-11-09T16:49:31.583",
+                  "endTime": "2025-11-09T20:49:31.583",
+                  "isAllDay": false,
+                  "status": "TODO",
+                  "recurrenceRule": null,
+                  "source": "USER",
+                  "sourceId": null,
+                  "createdAt": "2025-11-21T07:47:13.662877",
+                  "updatedAt": "2025-11-21T07:47:13.662919"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "일정 상세 조회",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Schedule"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "scheduleId": {
+                      "type": "integer"
+                    },
+                    "cognitoSub": {
+                      "type": "string"
+                    },
+                    "groupId": {
+                      "type": "integer"
+                    },
+                    "categoryId": {
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "startTime": {
+                      "type": "string"
+                    },
+                    "endTime": {
+                      "type": "string"
+                    },
+                    "isAllDay": {
+                      "type": "boolean"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "recurrenceRule": {
+                      "type": "null"
+                    },
+                    "source": {
+                      "type": "string"
+                    },
+                    "sourceId": {
+                      "type": "null"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "scheduleId",
+                    "cognitoSub",
+                    "groupId",
+                    "categoryId",
+                    "title",
+                    "description",
+                    "location",
+                    "startTime",
+                    "endTime",
+                    "isAllDay",
+                    "status",
+                    "recurrenceRule",
+                    "source",
+                    "sourceId",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                },
+                "example": {
+                  "scheduleId": 1,
+                  "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                  "groupId": 9007199254740991,
+                  "categoryId": 3,
+                  "title": "일정1",
+                  "description": "클라우드프로젝트 백엔드",
+                  "location": "카페 칸나",
+                  "startTime": "2025-11-09T16:49:31.583",
+                  "endTime": "2025-11-09T20:49:31.583",
+                  "isAllDay": false,
+                  "status": "TODO",
+                  "recurrenceRule": null,
+                  "source": "USER",
+                  "sourceId": null,
+                  "createdAt": "2025-11-21T07:47:13.662877",
+                  "updatedAt": "2025-11-21T07:53:35.354316"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "일정 삭제",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Schedule"
+        ],
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/todos": {
+      "post": {
+        "summary": "할일 생성",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Todo"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "priority": {
+                    "type": "string",
+                    "enum": [
+                      "LOW",
+                      "MEDIUM",
+                      "HIGH",
+                      "URGENT"
+                    ]
+                  }
+                },
+                "required": [
+                  "priority"
+                ]
+              },
+              "example": {
+                "title": "캡스톤 디자인 서브태스크1",
+                "description": "프로파일링 완료",
+                "startDate": "2025-11-09",
+                "dueDate": "2025-11-12",
+                "categoryId": 4,
+                "groupId": null,
+                "priority": "MEDIUM",
+                "parentTodoId": 1,
+                "scheduleId": null
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "todoId": {
+                      "type": "integer"
+                    },
+                    "cognitoSub": {
+                      "type": "string"
+                    },
+                    "groupId": {
+                      "type": "integer",
+                      "nullable": true
+                    },
+                    "categoryId": {
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "startDate": {
+                      "type": "string"
+                    },
+                    "dueDate": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "priority": {
+                      "type": "string"
+                    },
+                    "progressPercentage": {
+                      "type": "integer"
+                    },
+                    "parentTodoId": {
+                      "type": "integer",
+                      "nullable": true
+                    },
+                    "scheduleId": {
+                      "type": "integer",
+                      "nullable": true
+                    },
+                    "isAiGenerated": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "todoId",
+                    "cognitoSub",
+                    "groupId",
+                    "categoryId",
+                    "title",
+                    "description",
+                    "startDate",
+                    "dueDate",
+                    "status",
+                    "priority",
+                    "progressPercentage",
+                    "parentTodoId",
+                    "scheduleId",
+                    "isAiGenerated",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                },
+                "example": {
+                  "todoId": 2,
+                  "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                  "groupId": null,
+                  "categoryId": 4,
+                  "title": "캡스톤 디자인 서브태스크1",
+                  "description": "프로파일링 완료",
+                  "startDate": "2025-11-09",
+                  "dueDate": "2025-11-12",
+                  "status": "TODO",
+                  "priority": "MEDIUM",
+                  "progressPercentage": 0,
+                  "parentTodoId": 1,
+                  "scheduleId": null,
+                  "isAiGenerated": false,
+                  "createdAt": "2025-11-21T08:26:32.251313",
+                  "updatedAt": "2025-11-21T08:26:32.251332"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "할일 목록 조회",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Todo"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "todoId": {
+                        "type": "integer"
+                      },
+                      "cognitoSub": {
+                        "type": "string"
+                      },
+                      "groupId": {
+                        "type": "null"
+                      },
+                      "categoryId": {
+                        "type": "integer"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "startDate": {
+                        "type": "string"
+                      },
+                      "dueDate": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "priority": {
+                        "type": "string"
+                      },
+                      "progressPercentage": {
+                        "type": "integer"
+                      },
+                      "parentTodoId": {
+                        "type": "integer",
+                        "nullable": true
+                      },
+                      "scheduleId": {
+                        "type": "integer",
+                        "nullable": true
+                      },
+                      "isAiGenerated": {
+                        "type": "boolean"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "todoId",
+                      "cognitoSub",
+                      "groupId",
+                      "categoryId",
+                      "title",
+                      "description",
+                      "startDate",
+                      "dueDate",
+                      "status",
+                      "priority",
+                      "progressPercentage",
+                      "parentTodoId",
+                      "scheduleId",
+                      "isAiGenerated",
+                      "createdAt",
+                      "updatedAt"
+                    ]
+                  }
+                },
+                "example": [
+                  {
+                    "todoId": 1,
+                    "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                    "groupId": null,
+                    "categoryId": 4,
+                    "title": "캡스톤 디자인",
+                    "description": "캡스톤 디자인 최종 제출",
+                    "startDate": "2025-11-09",
+                    "dueDate": "2025-11-21",
+                    "status": "TODO",
+                    "priority": "HIGH",
+                    "progressPercentage": 0,
+                    "parentTodoId": null,
+                    "scheduleId": null,
+                    "isAiGenerated": false,
+                    "createdAt": "2025-11-21T08:20:13.989902",
+                    "updatedAt": "2025-11-21T08:20:13.989922"
+                  },
+                  {
+                    "todoId": 2,
+                    "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                    "groupId": null,
+                    "categoryId": 4,
+                    "title": "캡스톤 디자인 서브태스크1",
+                    "description": "프로파일링 완료",
+                    "startDate": "2025-11-09",
+                    "dueDate": "2025-11-12",
+                    "status": "TODO",
+                    "priority": "MEDIUM",
+                    "progressPercentage": 0,
+                    "parentTodoId": 1,
+                    "scheduleId": null,
+                    "isAiGenerated": false,
+                    "createdAt": "2025-11-21T08:26:32.251313",
+                    "updatedAt": "2025-11-21T08:26:32.251332"
+                  }
+                ]
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/todos/1/subtasks": {
+      "post": {
+        "summary": "서브태스크 생성",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Todo"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "title": "캡스톤 디자인 서브태스크2",
+                "description": "데모 만들기",
+                "startDate": "2025-11-12",
+                "dueDate": "2025-11-17",
+                "categoryId": 4,
+                "groupId": null,
+                "priority": "LOW",
+                "parentTodoId": 1,
+                "scheduleId": null
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "todoId": {
+                      "type": "integer"
+                    },
+                    "cognitoSub": {
+                      "type": "string"
+                    },
+                    "groupId": {
+                      "type": "integer",
+                      "nullable": true
+                    },
+                    "categoryId": {
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "startDate": {
+                      "type": "string"
+                    },
+                    "dueDate": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "priority": {
+                      "type": "string"
+                    },
+                    "progressPercentage": {
+                      "type": "integer"
+                    },
+                    "parentTodoId": {
+                      "type": "integer"
+                    },
+                    "scheduleId": {
+                      "type": "integer",
+                      "nullable": true
+                    },
+                    "isAiGenerated": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "todoId",
+                    "cognitoSub",
+                    "groupId",
+                    "categoryId",
+                    "title",
+                    "description",
+                    "startDate",
+                    "dueDate",
+                    "status",
+                    "priority",
+                    "progressPercentage",
+                    "parentTodoId",
+                    "scheduleId",
+                    "isAiGenerated",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                },
+                "example": {
+                  "todoId": 3,
+                  "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                  "groupId": null,
+                  "categoryId": 4,
+                  "title": "캡스톤 디자인 서브태스크2",
+                  "description": "데모 만들기",
+                  "startDate": "2025-11-12",
+                  "dueDate": "2025-11-17",
+                  "status": "TODO",
+                  "priority": "LOW",
+                  "progressPercentage": 0,
+                  "parentTodoId": 1,
+                  "scheduleId": null,
+                  "isAiGenerated": false,
+                  "createdAt": "2025-11-21T08:34:21.152394",
+                  "updatedAt": "2025-11-21T08:34:21.15241"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "서브태스크 목록 조회",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Todo"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "todoId": {
+                        "type": "integer"
+                      },
+                      "cognitoSub": {
+                        "type": "string"
+                      },
+                      "groupId": {
+                        "type": "null"
+                      },
+                      "categoryId": {
+                        "type": "integer"
+                      },
+                      "title": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "startDate": {
+                        "type": "string"
+                      },
+                      "dueDate": {
+                        "type": "string"
+                      },
+                      "status": {
+                        "type": "string"
+                      },
+                      "priority": {
+                        "type": "string"
+                      },
+                      "progressPercentage": {
+                        "type": "integer"
+                      },
+                      "parentTodoId": {
+                        "type": "integer"
+                      },
+                      "scheduleId": {
+                        "type": "null"
+                      },
+                      "isAiGenerated": {
+                        "type": "boolean"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "todoId",
+                      "cognitoSub",
+                      "groupId",
+                      "categoryId",
+                      "title",
+                      "description",
+                      "startDate",
+                      "dueDate",
+                      "status",
+                      "priority",
+                      "progressPercentage",
+                      "parentTodoId",
+                      "scheduleId",
+                      "isAiGenerated",
+                      "createdAt",
+                      "updatedAt"
+                    ]
+                  }
+                },
+                "example": [
+                  {
+                    "todoId": 2,
+                    "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                    "groupId": null,
+                    "categoryId": 4,
+                    "title": "캡스톤 디자인 서브태스크1",
+                    "description": "프로파일링 완료",
+                    "startDate": "2025-11-09",
+                    "dueDate": "2025-11-12",
+                    "status": "TODO",
+                    "priority": "MEDIUM",
+                    "progressPercentage": 0,
+                    "parentTodoId": 1,
+                    "scheduleId": null,
+                    "isAiGenerated": false,
+                    "createdAt": "2025-11-21T08:26:32.251313",
+                    "updatedAt": "2025-11-21T08:26:32.251332"
+                  },
+                  {
+                    "todoId": 3,
+                    "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                    "groupId": null,
+                    "categoryId": 4,
+                    "title": "캡스톤 디자인 서브태스크2",
+                    "description": "데모 만들기",
+                    "startDate": "2025-11-12",
+                    "dueDate": "2025-11-17",
+                    "status": "TODO",
+                    "priority": "LOW",
+                    "progressPercentage": 0,
+                    "parentTodoId": 1,
+                    "scheduleId": null,
+                    "isAiGenerated": false,
+                    "createdAt": "2025-11-21T08:34:21.152394",
+                    "updatedAt": "2025-11-21T08:34:21.15241"
+                  }
+                ]
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/todos/2": {
+      "put": {
+        "summary": "할일 수정",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Todo"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "title": "캡스톤 디자인 서브태스크1",
+                "description": "프로파일링 완료",
+                "startDate": "2025-11-09",
+                "dueDate": "2025-11-11",
+                "categoryId": 4,
+                "groupId": null,
+                "priority": "MEDIUM",
+                "parentTodoId": 1,
+                "scheduleId": 2
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                },
+                "example": {
+                  "todoId": 2,
+                  "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                  "groupId": null,
+                  "categoryId": 4,
+                  "title": "캡스톤 디자인 서브태스크1",
+                  "description": "프로파일링 완료",
+                  "startDate": "2025-11-09",
+                  "dueDate": "2025-11-11",
+                  "status": "TODO",
+                  "priority": "MEDIUM",
+                  "progressPercentage": 0,
+                  "parentTodoId": 1,
+                  "scheduleId": 2,
+                  "isAiGenerated": false,
+                  "createdAt": "2025-11-21T08:26:32.251313",
+                  "updatedAt": "2025-11-21T08:26:32.251332"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "할일 삭제",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Todo"
+        ],
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "",
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/todos/2/status": {
+      "patch": {
+        "summary": "할일 상태 변경",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Todo"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {
+                "status": "DONE"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "todoId": {
+                      "type": "integer"
+                    },
+                    "cognitoSub": {
+                      "type": "string"
+                    },
+                    "groupId": {
+                      "type": "integer",
+                      "nullable": true
+                    },
+                    "categoryId": {
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "startDate": {
+                      "type": "string"
+                    },
+                    "dueDate": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "priority": {
+                      "type": "string"
+                    },
+                    "progressPercentage": {
+                      "type": "integer"
+                    },
+                    "parentTodoId": {
+                      "type": "integer",
+                      "nullable": true
+                    },
+                    "scheduleId": {
+                      "type": "integer",
+                      "nullable": true
+                    },
+                    "isAiGenerated": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "todoId",
+                    "cognitoSub",
+                    "groupId",
+                    "categoryId",
+                    "title",
+                    "description",
+                    "startDate",
+                    "dueDate",
+                    "status",
+                    "priority",
+                    "progressPercentage",
+                    "parentTodoId",
+                    "scheduleId",
+                    "isAiGenerated",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                },
+                "example": {
+                  "todoId": 2,
+                  "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                  "groupId": null,
+                  "categoryId": 4,
+                  "title": "캡스톤 디자인 서브태스크1",
+                  "description": "프로파일링 완료",
+                  "startDate": "2025-11-09",
+                  "dueDate": "2025-11-11",
+                  "status": "DONE",
+                  "priority": "MEDIUM",
+                  "progressPercentage": 100,
+                  "parentTodoId": 1,
+                  "scheduleId": 2,
+                  "isAiGenerated": false,
+                  "createdAt": "2025-11-21T08:26:32.251313",
+                  "updatedAt": "2025-11-21T08:54:40.620615"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/todos/1": {
+      "get": {
+        "summary": "할일 상세 조회",
+        "deprecated": false,
+        "description": "",
+        "tags": [
+          "Todo"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "todoId": {
+                      "type": "integer"
+                    },
+                    "cognitoSub": {
+                      "type": "string"
+                    },
+                    "groupId": {
+                      "type": "integer",
+                      "nullable": true
+                    },
+                    "categoryId": {
+                      "type": "integer"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    },
+                    "startDate": {
+                      "type": "string"
+                    },
+                    "dueDate": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "priority": {
+                      "type": "string"
+                    },
+                    "progressPercentage": {
+                      "type": "integer"
+                    },
+                    "parentTodoId": {
+                      "type": "integer",
+                      "nullable": true
+                    },
+                    "scheduleId": {
+                      "type": "integer",
+                      "nullable": true
+                    },
+                    "isAiGenerated": {
+                      "type": "boolean"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    },
+                    "updatedAt": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "todoId",
+                    "cognitoSub",
+                    "groupId",
+                    "categoryId",
+                    "title",
+                    "description",
+                    "startDate",
+                    "dueDate",
+                    "status",
+                    "priority",
+                    "progressPercentage",
+                    "parentTodoId",
+                    "scheduleId",
+                    "isAiGenerated",
+                    "createdAt",
+                    "updatedAt"
+                  ]
+                },
+                "example": {
+                  "todoId": 1,
+                  "cognitoSub": "d2b0f7e5-d37e-4dff-8f68-8240bde09e08",
+                  "groupId": null,
+                  "categoryId": 4,
+                  "title": "캡스톤 디자인",
+                  "description": "캡스톤 디자인 최종 제출",
+                  "startDate": "2025-11-09",
+                  "dueDate": "2025-11-21",
+                  "status": "IN_PROGRESS",
+                  "priority": "HIGH",
+                  "progressPercentage": 50,
+                  "parentTodoId": null,
+                  "scheduleId": null,
+                  "isAiGenerated": false,
+                  "createdAt": "2025-11-21T08:20:13.989902",
+                  "updatedAt": "2025-11-21T08:54:40.640655"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {},
+    "securitySchemes": {
+      "Bearer": {
+        "bearerFormat": "JWT",
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/api/v1",
+      "description": "Develop Env"
+    }
+  ],
+  "security": [
+    {
+      "Bearer": []
+    }
+  ]
+}
