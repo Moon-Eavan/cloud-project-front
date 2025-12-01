@@ -167,7 +167,7 @@ export default function KanbanBoard({ tasks, setTasks }: KanbanBoardProps) {
                   onChange={(e) => setNewTask({ ...newTask, endDate: e.target.value })}
                 />
               </div>
-              <Button onClick={handleAddTask} className="w-full">
+              <Button onClick={handleAddTask} className="w-full bg-blue-500 hover:bg-blue-600">
                 추가
               </Button>
             </div>

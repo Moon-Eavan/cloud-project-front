@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -298,37 +299,36 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
           <DialogTrigger asChild>
             <Button className="bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/30 rounded-xl">
               <Plus className="w-4 h-4 mr-2" />
-              작업 추가
+              새 작업 추가
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>새 작업 추가</DialogTitle>
-              <DialogDescription>
-                새로 프로젝트를 생성하고 일정을 설정하세요.
-              </DialogDescription>
+              <DialogDescription>새로운 작업을 추가합니다.</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div>
-                <Label htmlFor="project-name">프로젝트 이름</Label>
+                <Label htmlFor="project-name">제목</Label>
                 <Input
                   id="project-name"
                   value={newProject.title}
                   onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
-                  placeholder="프로젝트 이름을 입력하세요"
+                  placeholder="작업 제목을 입력하세요"
                 />
               </div>
               <div>
                 <Label htmlFor="project-description">설명</Label>
-                <Input
+                <Textarea
                   id="project-description"
                   value={newProject.description}
                   onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-                  placeholder="프로젝트 설명을 입력하세요"
+                  placeholder="작업 설명을 입력하세요"
+                  className="min-h-[120px]"
                 />
               </div>
               <div>
-                <Label htmlFor="project-start">시작일</Label>
+                <Label htmlFor="project-start">시작 날짜</Label>
                 <Input
                   id="project-start"
                   type="date"
@@ -337,7 +337,7 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
                 />
               </div>
               <div>
-                <Label htmlFor="project-end">종료일</Label>
+                <Label htmlFor="project-end">종료 날짜</Label>
                 <Input
                   id="project-end"
                   type="date"
@@ -345,7 +345,7 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
                   onChange={(e) => setNewProject({ ...newProject, endDate: e.target.value })}
                 />
               </div>
-              <Button onClick={handleAddProject} className="w-full">
+              <Button onClick={handleAddProject} className="w-full bg-blue-500 hover:bg-blue-600">
                 추가
               </Button>
             </div>
@@ -368,25 +368,26 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <Label htmlFor="subtask-name">태스크 이름</Label>
+              <Label htmlFor="subtask-name">제목</Label>
               <Input
                 id="subtask-name"
                 value={newSubTask.title}
                 onChange={(e) => setNewSubTask({ ...newSubTask, title: e.target.value })}
-                placeholder="태스크 이름을 입력하세요"
+                placeholder="작업 제목을 입력하세요"
               />
             </div>
             <div>
               <Label htmlFor="subtask-description">설명</Label>
-              <Input
+              <Textarea
                 id="subtask-description"
                 value={newSubTask.description}
                 onChange={(e) => setNewSubTask({ ...newSubTask, description: e.target.value })}
-                placeholder="태스크 설명을 입력하세요"
+                placeholder="작업 설명을 입력하세요"
+                className="min-h-[120px]"
               />
             </div>
             <div>
-              <Label htmlFor="subtask-start">시작일</Label>
+              <Label htmlFor="subtask-start">시작 날짜</Label>
               <Input
                 id="subtask-start"
                 type="date"
@@ -395,7 +396,7 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
               />
             </div>
             <div>
-              <Label htmlFor="subtask-end">종료일</Label>
+              <Label htmlFor="subtask-end">종료 날짜</Label>
               <Input
                 id="subtask-end"
                 type="date"
@@ -403,7 +404,7 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
                 onChange={(e) => setNewSubTask({ ...newSubTask, endDate: e.target.value })}
               />
             </div>
-            <Button onClick={handleAddSubTask} className="w-full">
+            <Button onClick={handleAddSubTask} className="w-full bg-blue-500 hover:bg-blue-600">
               추가
             </Button>
           </div>
