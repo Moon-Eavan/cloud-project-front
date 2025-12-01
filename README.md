@@ -69,11 +69,12 @@ The application will be available at **http://localhost:3000**
 ```
 Calendar/
 ├── src/
-│   ├── api/                    # API layer (mock implementations)
-│   │   ├── authApi.ts
-│   │   ├── calendarsApi.ts
-│   │   ├── schedulesApi.ts
-│   │   ├── tasksApi.ts
+│   ├── api/                    # API layer (backend integrated)
+│   │   ├── client.ts           # Axios client with JWT auth
+│   │   ├── authApi.ts          # ✅ Backend integrated
+│   │   ├── calendarsApi.ts     # ✅ Backend integrated
+│   │   ├── schedulesApi.ts     # ✅ Backend integrated
+│   │   ├── tasksApi.ts         # ✅ Backend integrated
 │   │   ├── friendsApi.ts
 │   │   ├── groupsApi.ts
 │   │   └── notificationsApi.ts
@@ -143,12 +144,11 @@ Calendar/
 
 ## 🎯 Current Implementation Status
 
-### ✅ Completed
+### ✅ Completed - Core Features
 - Project setup and configuration
 - Complete folder structure
 - TypeScript type definitions (matching spec.md)
-- API layer with mock implementations
-- All core features migrated and working:
+- All core features implemented and working:
   - Authentication (login/signup)
   - Calendar with 3 calendar types
   - Schedule management
@@ -158,67 +158,120 @@ Calendar/
   - Notifications
   - My Page
 
-### 🔄 Ready for Backend Integration
+### ✅ Backend Integration Completed
 
-All API functions are marked with `// TODO: Replace with axios` comments. The mock implementations follow the same interface that will be used with the real backend:
+**Integrated APIs:**
+1. **Authentication API** (`authApi.ts`)
+   - JWT-based login/signup
+   - Token management in localStorage
+   - Auto token refresh on page load
 
+2. **Categories API** (`calendarsApi.ts`)
+   - Backend: `/api/v1/categories`
+   - Create/read calendars
+   - Auto-create default calendar on first login
+   - Maps to frontend Calendar type
+
+3. **Schedules API** (`schedulesApi.ts`)
+   - Backend: `/api/v1/schedules`
+   - Full CRUD operations
+   - Status updates
+   - Timezone handling (ISO 8601)
+
+4. **Todos API** (`tasksApi.ts`)
+   - Backend: `/api/v1/todos`
+   - Parent/subtask hierarchy
+   - Status mapping (TODO/IN_PROGRESS/DONE ↔ todo/progress/done)
+   - Priority support (LOW/MEDIUM/HIGH/URGENT)
+   - Auto category assignment
+
+**Implementation Details:**
 ```typescript
-// Example from authApi.ts
-async login(credentials: LoginCredentials): Promise<AuthResponse> {
-  await delay(500);  // Simulated network delay
+// Example: tasksApi.ts
+async createTaskFromKanban(taskData: Omit<Task, 'id' | 'parentTaskId'>): Promise<Task> {
+  // Fetch user's categories
+  const categoriesResponse = await apiClient.get('/v1/categories');
+  const defaultCategoryId = categoriesResponse.data[0].categoryId;
 
-  // TODO: Replace with:
-  // const response = await axios.post('/api/auth/login', credentials);
-  // return response.data;
+  const requestBody = {
+    title: taskData.title,
+    description: taskData.description || null,
+    startDate: formatDateToString(taskData.startDate),
+    dueDate: formatDateToString(taskData.endDate),
+    status: 'TODO',
+    categoryId: defaultCategoryId,
+    scheduleId: null,
+    priority: 'MEDIUM',
+  };
 
-  // ... mock implementation
+  const response = await apiClient.post<TodoResponse>('/v1/todos', requestBody);
+  return mapTodoResponseToTask(response.data);
 }
 ```
 
-### 📝 Integration TODOs
+### 🔄 Pending Backend Integration
 
-1. **Backend API Integration**:
-   - Replace mock API functions with real axios calls
-   - Update API endpoints
-   - Handle authentication tokens
-   - Implement error handling
+1. **Friends API** (UI ready)
+   - Friend requests
+   - Friend list management
 
-2. **Google Calendar OAuth**:
-   - Implement OAuth flow
-   - Sync schedules bidirectionally
-   - Handle token refresh
+2. **Groups API** (UI ready)
+   - Group creation
+   - Member management
+   - Group schedules
 
-3. **E-Campus Integration**:
-   - Implement token validation
-   - Fetch assignments via API
-   - Sync to calendar
+3. **Notifications API** (UI ready)
+   - Real-time notifications
+   - Mark as read
 
-4. **Real-time Features**:
-   - WebSocket for notifications
-   - Live schedule updates
-   - Collaborative group scheduling
+4. **Google Calendar OAuth** (UI ready)
+   - OAuth flow
+   - Bidirectional sync
+
+5. **E-Campus Integration** (UI ready)
+   - Token validation
+   - Canvas assignments sync
 
 ## 🧪 Testing
 
-### Mock Data
-The application comes with pre-populated mock data for testing:
+### Backend Testing
 
-- **User**: 김민수 (minsu@example.com)
-- **Calendars**: Google Calendar, Calendar (local), E-Campus
-- **Schedules**: Sample events in all three calendars
-- **Tasks**: 3 sample tasks in different states
-- **Friends**: 3 friends with accepted status
-- **Groups**: 2 groups (team project, study group)
-- **Notifications**: Sample friend request and group schedule notifications
+**Prerequisites:**
+- Backend services running on `localhost:8080` (API Gateway)
+- Docker services (MySQL, LocalStack) running
 
-### Test Flows
+**Test Flows:**
 
-1. **Login**: Use any email (user will be created if doesn't exist)
-2. **Calendar**: View schedules, toggle calendar visibility, add/edit schedules
-3. **Tasks**: Create tasks in Kanban, move between columns, view in Gantt
-4. **Friends**: Add friends, view friend list
-5. **Groups**: Create groups, view group schedules
-6. **Notifications**: Check notification panel at bottom-left
+1. **Signup & Login** (Real Backend)
+   - Create account with email/password
+   - JWT token stored in localStorage
+   - Auto-redirect to dashboard
+
+2. **Calendar Management** (Real Backend)
+   - First login auto-creates default calendar
+   - Create/edit/delete schedules
+   - Schedules persist across page refreshes
+   - Toggle calendar visibility
+
+3. **Task Management** (Real Backend)
+   - Create tasks in Kanban board
+   - Tasks persist and sync with backend
+   - Move tasks between columns (todo/progress/done)
+   - View tasks in Gantt chart
+   - Create subtasks in Gantt
+   - Status changes sync between Kanban and Gantt
+
+4. **Data Persistence** (✅ Working)
+   - All data fetched from backend on login
+   - Create/update/delete operations sync with backend
+   - Page refresh maintains all data
+
+### Known Limitations
+
+- **Friends/Groups**: UI ready, backend integration pending
+- **Notifications**: UI ready, backend integration pending
+- **Google Calendar**: UI ready, OAuth flow pending
+- **E-Campus Sync**: UI ready, Canvas integration pending
 
 ## 📚 Key Implementation Details
 
@@ -298,12 +351,25 @@ Per spec.md section 4.2, converting a schedule to task:
 
 ## 🚢 Deployment Checklist
 
-- [ ] Replace all mock API calls with real backend endpoints
-- [ ] Implement proper authentication with JWT
-- [ ] Add environment variables for API URLs
+### Backend Integration
+- [x] Replace auth API with real backend (JWT)
+- [x] Replace calendars API with categories endpoint
+- [x] Replace schedules API with backend
+- [x] Replace tasks API with todos endpoint
+- [x] Implement auto-create default calendar
+- [ ] Integrate friends API
+- [ ] Integrate groups API
+- [ ] Integrate notifications API
+- [ ] Implement Google Calendar OAuth
+- [ ] Implement Canvas/E-Campus sync
+
+### Production Ready
+- [x] Environment variables for API URLs
+- [x] JWT authentication with token refresh
+- [x] Error handling in API layer
 - [ ] Set up error tracking (e.g., Sentry)
-- [ ] Add loading states and error boundaries
-- [ ] Implement proper form validation
+- [ ] Add comprehensive loading states
+- [ ] Add error boundaries
 - [ ] Add analytics
 - [ ] Optimize bundle size
 - [ ] Add service worker for PWA

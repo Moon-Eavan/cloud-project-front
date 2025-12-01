@@ -7,15 +7,31 @@
 - **종류**
   - `Google Calendar`: 사용자가 OAuth로 연동한 Google 캘린더
   - `Calendar`: 서비스 자체에서 관리하는 로컬 캘린더
-  - `E-Campus`: e-campus 과제 정보를 일정 형태로 보여주는 **읽기 전용** 캘린더  
+  - `E-Campus`: e-campus 과제 정보를 일정 형태로 보여주는 **읽기 전용** 캘린더
     - My Page에서 사용자가 등록한 **E-Campus 토큰**을 사용해 과제 정보를 동기화한다.
 
-- **필드(예시)**
-  - `id`: 고유 식별자
+- **프론트엔드 필드**
+  - `id`: 문자열 (고유 식별자)
   - `name`: 캘린더 이름 (예: "Google Calendar", "Calendar", "E-Campus")
   - `type`: `enum(google, local, ecampus)`
   - `color`: 캘린더를 구분하기 위한 색상
   - `isVisible`: boolean (사이드바에서 체크 여부)
+
+- **백엔드 필드 (CategoryResponse)**
+  - `categoryId`: 숫자 (→ 프론트엔드 `id`로 변환)
+  - `name`: 문자열
+  - `color`: 문자열 (hex 코드)
+  - `icon`: 문자열 | null
+  - `isDefault`: boolean
+  - `sourceType`: 문자열 (🆕 예: "USER", "CANVAS", "GOOGLE")
+  - `sourceId`: 문자열 (🆕 외부 소스 식별자)
+  - `groupId`: 숫자 | null
+  - `createdAt`, `updatedAt`: ISO 8601 문자열
+
+- **자동 생성 규칙** (✅ 구현 완료)
+  - 첫 로그인 시 카테고리가 없으면 기본 "Calendar" 자동 생성
+  - 색상: `#84cc16` (연두색)
+  - 구현 위치: `App.tsx` useEffect
 
 - **동작**
   - 좌측 사이드바에 각 캘린더가 리스트로 표시된다.
@@ -34,38 +50,96 @@
 
 ## 1.2 Schedule(캘린더 일정)
 
-- **사용 위치**: 메인 캘린더  
+- **사용 위치**: 메인 캘린더
 
-- **필드**
+- **프론트엔드 필드**
+  - `id`: 문자열 (고유 식별자)
   - `title`: 문자열 (필수)
   - `description`: 문자열 (선택)
-  - `start`: 날짜+시간
-  - `end`: 날짜+시간
+  - `start`: Date 객체 (날짜+시간)
+  - `end`: Date 객체 (날짜+시간)
   - `location`: 문자열
-  - `isCompleted`: boolean  
+  - `isCompleted`: boolean
     - `true`일 경우 캘린더에서 **취소선**으로 표시
-  - `calendarId`: 이 일정이 속한 캘린더 ID  
+  - `calendarId`: 이 일정이 속한 캘린더 ID
     - `google/local/ecampus` 타입의 `Calendar` 중 하나를 참조
+
+- **백엔드 필드 (ScheduleResponse)**
+  - `scheduleId`: 숫자 (→ 프론트엔드 `id`로 변환)
+  - `title`: 문자열
+  - `description`: 문자열 | null
+  - `startTime`: ISO 8601 문자열 (→ 프론트엔드 `start`로 변환)
+  - `endTime`: ISO 8601 문자열 (→ 프론트엔드 `end`로 변환)
+  - `location`: 문자열 | null
+  - `isAllDay`: boolean
+  - `status`: `enum(TODO, IN_PROGRESS, DONE)` (→ 프론트엔드 `isCompleted`로 변환)
+  - `categoryId`: 숫자
+  - `groupId`: 숫자 | null
+  - `recurrenceRule`: 문자열 | null
+  - `source`: 문자열 (예: "USER", "CANVAS")
+  - `sourceId`: 문자열 | null
+  - `createdAt`, `updatedAt`: ISO 8601 문자열
+
+- **날짜/시간 변환 규칙**
+  - Frontend Date → Backend: ISO 8601 문자열 (`toISOString()`)
+  - Backend ISO 문자열 → Frontend: `new Date(isoString)`
+
+- **Status 매핑**
+  - Backend `status === "DONE"` → Frontend `isCompleted = true`
+  - Backend `status !== "DONE"` → Frontend `isCompleted = false`
 
 ---
 
 ## 1.3 Task(작업)
 
-- **사용 위치**: 칸반보드(Kanban), Gantt 차트  
+- **사용 위치**: 칸반보드(Kanban), Gantt 차트
 
-- **필드**
+- **프론트엔드 필드**
+  - `id`: 문자열 (고유 식별자)
   - `title`: 문자열 (필수)
   - `description`: 문자열 (선택)
-  - `startDate`: 날짜
-  - `endDate`: 날짜
+  - `startDate`: Date 객체
+  - `endDate`: Date 객체
   - `status`: `enum(todo, progress, done)`
   - `parentTaskId`: 상위 태스크 ID (없으면 `null` = parent task)
 
-- **용어**
-  - **parent task**: `parentTaskId == null` 인 태스크  
-  - **subtask**: `parentTaskId != null` 인 태스크  
+- **백엔드 필드 (TodoResponse)**
+  - `todoId`: 숫자 (→ 프론트엔드 `id`로 변환)
+  - `title`: 문자열
+  - `description`: 문자열 | null
+  - `startDate`: 문자열 (YYYY-MM-DD)
+  - `dueDate`: 문자열 (YYYY-MM-DD, → 프론트엔드 `endDate`로 변환)
+  - `status`: `enum(TODO, IN_PROGRESS, DONE)` (→ 프론트엔드 소문자로 변환)
+  - `priority`: `enum(LOW, MEDIUM, HIGH, URGENT)` (필수)
+  - `parentTodoId`: 숫자 | null
+  - `categoryId`: 숫자 (필수)
+  - `scheduleId`: 숫자 | null
+  - `progressPercentage`: 숫자
+  - `isAiGenerated`: boolean
+  - `createdAt`, `updatedAt`: ISO 8601 문자열
 
-> **중요**: 캘린더의 `schedule`과 칸반/간트의 `task`는 서로 다른 개념이다.  
+- **용어**
+  - **parent task**: `parentTaskId == null` 인 태스크
+  - **subtask**: `parentTaskId != null` 인 태스크
+
+- **상태 매핑 규칙**
+  ```typescript
+  // Frontend → Backend
+  todo → TODO
+  progress → IN_PROGRESS
+  done → DONE
+
+  // Backend → Frontend
+  TODO → todo
+  IN_PROGRESS → progress
+  DONE → done
+  ```
+
+- **날짜 변환 규칙**
+  - Frontend Date → Backend: `YYYY-MM-DD` 문자열
+  - Backend 문자열 → Frontend: `new Date(dateStr)`
+
+> **중요**: 캘린더의 `schedule`과 칸반/간트의 `task`는 서로 다른 개념이다.
 > 단, 캘린더에서 특정 기능을 이용할 때 `task`를 새로 생성할 수 있다.
 
 ---
@@ -424,18 +498,43 @@
 
 ### API 엔드포인트 매핑
 
-| 프론트엔드 개념 (spec.md 1~7장) | 백엔드 서비스 | API 엔드포인트 | 비고 |
-|--------------------------|------------|--------------|------|
-| **Calendar** (google/local/ecampus) | Schedule-Service | `/api/v1/categories` | 캘린더 타입 관리 |
-| **Schedule** (캘린더 일정) | Schedule-Service | `/api/v1/schedules` | 시간 단위 일정 |
-| **Task** (칸반/간트) | Schedule-Service | `/api/v1/todos` | 기간 단위 할일 |
-| **Canvas 과제** | Course-Service | `/api/v1/assignments` | E-Campus 연동 |
-| **친구** | User-Service | `/api/v1/friends` | 친구 관계 관리 |
-| **그룹** | User-Service | `/api/v1/groups` | 그룹 및 멤버 관리 |
-| **알림** | User-Service | `/api/v1/notifications` | 알림 발송/조회 |
+| 프론트엔드 개념 (spec.md 1~7장) | 백엔드 서비스 | API 엔드포인트 | 구현 상태 | 비고 |
+|--------------------------|------------|--------------|---------|------|
+| **인증** (회원가입/로그인) | User-Service | `/api/v1/auth/*` | ✅ 완료 | JWT 토큰 |
+| **Calendar** (google/local/ecampus) | Schedule-Service | `/api/v1/categories` | ✅ 완료 | 캘린더 타입 관리 |
+| **Schedule** (캘린더 일정) | Schedule-Service | `/api/v1/schedules` | ✅ 완료 | 시간 단위 일정 |
+| **Task** (칸반/간트) | Schedule-Service | `/api/v1/todos` | ✅ 완료 | 기간 단위 할일 |
+| **Canvas 과제** | Course-Service | `/api/v1/assignments` | 🔄 대기 | E-Campus 연동 |
+| **친구** | User-Service | `/api/v1/friends` | 🔄 대기 | 친구 관계 관리 |
+| **그룹** | User-Service | `/api/v1/groups` | 🔄 대기 | 그룹 및 멤버 관리 |
+| **알림** | User-Service | `/api/v1/notifications` | 🔄 대기 | 알림 발송/조회 |
 
 > **참고**: 클라이언트는 모든 요청을 `/api` prefix와 함께 API Gateway로 전송합니다.
 > Gateway는 `/api`를 제거하고 해당 백엔드 서비스로 라우팅합니다.
+
+### 최신 API 업데이트 (2025-12-01)
+
+**✅ 완료된 통합:**
+
+1. **Todos API** (`/api/v1/todos`)
+   - **Priority 필드**: `LOW | MEDIUM | HIGH | URGENT` (필수)
+   - **Status 매핑**: `TODO ↔ todo`, `IN_PROGRESS ↔ progress`, `DONE ↔ done`
+   - **Parent/Subtask**: `parentTodoId`로 계층 구조 관리
+   - **자동 카테고리 할당**: 첫 번째 카테고리 자동 사용
+
+2. **Categories API** (`/api/v1/categories`)
+   - **새 필드**: `sourceType`, `sourceId` (외부 연동 추적용)
+   - **자동 생성**: 첫 로그인 시 기본 캘린더 자동 생성
+
+3. **Schedules API** (`/api/v1/schedules`)
+   - **ISO 8601 형식**: 날짜/시간 처리
+   - **Status 변경**: PATCH `/schedules/{id}/status`
+
+**프론트엔드 구현 상세:**
+- `tasksApi.ts`: 완전한 CRUD + 상태 변환
+- `calendarsApi.ts`: 카테고리 생성/조회 + 자동 생성 로직
+- `schedulesApi.ts`: 일정 관리 + 타임존 처리
+- `App.tsx`: 로그인 시 자동 데이터 fetch + 기본 캘린더 생성
 
 ---
 
@@ -553,3 +652,117 @@ cd app/backend/schedule-service && ./gradlew bootRun
 1. 백엔드 Swagger 문서 확인: http://localhost:8080/swagger-ui.html
 2. 상세 설계 문서 확인: [../UniSync/docs/design/api-documentation.md](../UniSync/docs/design/api-documentation.md)
 3. 변경사항이 spec.md의 개념과 충돌하는 경우 팀과 논의 필요
+
+---
+
+# 9. 프론트엔드-백엔드 통합 상태 (2025-12-01)
+
+## 9.1 ✅ 완료된 통합
+
+### 인증 (Authentication)
+- **API**: `/api/v1/auth/signup`, `/api/v1/auth/login`
+- **구현 파일**: `src/api/authApi.ts`
+- **기능**: JWT 기반 회원가입/로그인, localStorage 토큰 관리
+
+### 카테고리/캘린더 (Categories)
+- **API**: `/api/v1/categories`
+- **구현 파일**: `src/api/calendarsApi.ts`
+- **기능**:
+  - 카테고리 목록 조회
+  - 카테고리 생성 (자동 기본 캘린더 생성 포함)
+  - 백엔드 `CategoryResponse` ↔ 프론트엔드 `Calendar` 타입 변환
+  - `sourceType`, `sourceId` 필드 지원
+
+### 일정 (Schedules)
+- **API**: `/api/v1/schedules`
+- **구현 파일**: `src/api/schedulesApi.ts`
+- **기능**:
+  - 전체 CRUD 작업
+  - ISO 8601 날짜/시간 변환
+  - Status 업데이트 (PATCH `/schedules/{id}/status`)
+  - `ScheduleResponse` ↔ `Schedule` 타입 변환
+
+### 할일/작업 (Todos/Tasks)
+- **API**: `/api/v1/todos`
+- **구현 파일**: `src/api/tasksApi.ts`
+- **기능**:
+  - Parent/subtask 계층 구조 관리
+  - 칸반보드용 task 생성 (parent only)
+  - 간트차트용 task 생성 (parent + subtask)
+  - 서브태스크 생성 (`POST /todos/{parentId}/subtasks`)
+  - Status 변환 (TODO/IN_PROGRESS/DONE ↔ todo/progress/done)
+  - Priority 자동 할당 (MEDIUM)
+  - 자동 카테고리 할당 (첫 번째 카테고리 사용)
+
+## 9.2 🔄 대기 중인 통합
+
+- **Friends API**: UI 완성, 백엔드 통합 대기
+- **Groups API**: UI 완성, 백엔드 통합 대기
+- **Notifications API**: UI 완성, 백엔드 통합 대기
+- **Google Calendar OAuth**: UI 완성, OAuth 플로우 구현 대기
+- **Canvas/E-Campus Sync**: UI 완성, Lambda 통합 대기
+
+## 9.3 주요 구현 패턴
+
+### 타입 변환 패턴
+```typescript
+// Backend → Frontend
+const mapTodoResponseToTask = (response: TodoResponse): Task => {
+  return {
+    id: response.todoId.toString(),
+    title: response.title,
+    description: response.description || '',
+    startDate: parseDateString(response.startDate),
+    endDate: parseDateString(response.dueDate),
+    status: mapBackendStatusToFrontend(response.status),
+    parentTaskId: response.parentTodoId?.toString() || null,
+  };
+};
+```
+
+### 날짜 변환 패턴
+```typescript
+// Date → YYYY-MM-DD
+const formatDateToString = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Date → ISO 8601
+const date = new Date();
+const isoString = date.toISOString(); // "2025-12-01T12:00:00.000Z"
+```
+
+### 자동 카테고리 할당 패턴
+```typescript
+// 모든 todo 생성 시 자동으로 첫 번째 카테고리 사용
+const categoriesResponse = await apiClient.get('/v1/categories');
+if (categoriesResponse.data.length === 0) {
+  throw new Error('카테고리가 없습니다. 먼저 카테고리를 생성해주세요.');
+}
+const defaultCategoryId = categoriesResponse.data[0].categoryId;
+```
+
+### 자동 기본 캘린더 생성 패턴
+```typescript
+// App.tsx - 첫 로그인 시 카테고리가 없으면 자동 생성
+let fetchedCalendars = await calendarsApi.listCalendars();
+if (!fetchedCalendars || fetchedCalendars.length === 0) {
+  const defaultCalendar = await calendarsApi.createCalendar({
+    name: 'Calendar',
+    color: '#84cc16',
+    icon: null,
+  });
+  fetchedCalendars = [defaultCalendar];
+  toast.success('기본 캘린더가 생성되었습니다.');
+}
+```
+
+## 9.4 API 명세 참조
+
+전체 API 명세는 다음 위치에서 확인:
+- **OpenAPI 3.0 Spec**: `api-spec.json`
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **백엔드 문서**: [../UniSync/docs/design/system-architecture.md](../UniSync/docs/design/system-architecture.md)
