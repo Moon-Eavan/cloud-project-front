@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Lock, LogOut, Camera, RefreshCw, BookOpen, FileText } from 'lucide-react';
+import { Mail, Lock, LogOut, Camera, RefreshCw, BookOpen, FileText, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -293,9 +293,7 @@ export default function MyPage({ user, onLogout, onUserUpdate, onDataRefresh }: 
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 flex items-center justify-center">
-                    <span className="text-lg">👤</span>
-                  </div>
+                  <User className="w-5 h-5 text-gray-400" />
                   <div>
                     <p className="text-sm text-gray-500">이름</p>
                     <p className="font-medium">{user.name}</p>
