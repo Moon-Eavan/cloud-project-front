@@ -401,7 +401,7 @@ export default function App() {
       {/* Calendar Sources Section */}
       <div className="px-4 pb-4 border-b border-gray-200">
         <h3 className="text-xs text-gray-500 mb-2 px-2">캘린더</h3>
-        <div className="space-y-1">
+        <div className="space-y-1 max-h-[234px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent hover:scrollbar-thumb-gray-400">
           {calendars.map((calendar) => (
             <label
               key={calendar.id}
@@ -417,7 +417,7 @@ export default function App() {
                   }}
                 />
               </div>
-              <span className="text-sm text-gray-700">{calendar.name}</span>
+              <span className="text-sm text-gray-700 truncate">{calendar.name}</span>
             </label>
           ))}
         </div>
