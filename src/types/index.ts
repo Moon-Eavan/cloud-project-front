@@ -11,6 +11,7 @@ export interface Calendar {
   type: CalendarType;
   color: string;
   isVisible: boolean;
+  sourceId?: string; // For Canvas/Google integration - stores external course/calendar ID
 }
 
 // Schedule Types

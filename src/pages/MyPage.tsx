@@ -173,6 +173,7 @@ export default function MyPage({ user, onLogout, onUserUpdate, onDataRefresh }: 
     }
 
     console.log('[MyPage] Starting assignment sync for enabled courses...');
+    console.log('[MyPage] Enabled enrollments:', enabledEnrollments.map(e => e.course.name));
     setIsSyncingAssignments(true);
     try {
       const response = await ecampusApi.syncCanvas('assignments');
@@ -182,12 +183,13 @@ export default function MyPage({ user, onLogout, onUserUpdate, onDataRefresh }: 
         toast.warning('동기화는 완료되었으나 가져온 과제가 없습니다.');
       } else {
         toast.success(response.message);
-
-        // Refresh calendars and schedules after sync
-        console.log('[MyPage] Refreshing calendars and schedules...');
-        await onDataRefresh();
-        console.log('[MyPage] Data refresh complete');
       }
+
+      // ALWAYS refresh calendars and schedules after sync
+      // This will filter out calendars for disabled courses
+      console.log('[MyPage] Refreshing calendars and schedules...');
+      await onDataRefresh();
+      console.log('[MyPage] Data refresh complete - sidebar should now show only enabled courses');
     } catch (error: any) {
       console.error('[MyPage] Assignment sync error:', error);
       toast.error(error.message || '과제 동기화에 실패했습니다.');

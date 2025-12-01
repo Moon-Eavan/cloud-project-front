@@ -22,6 +22,7 @@ import { authApi } from './api/authApi';
 import { schedulesApi } from './api/schedulesApi';
 import { calendarsApi } from './api/calendarsApi';
 import { tasksApi } from './api/tasksApi';
+import { enrollmentsApi } from './api/enrollmentsApi';
 
 // Types
 import type {
@@ -180,9 +181,30 @@ export default function App() {
           console.log('Fetched schedules:', fetchedSchedules);
           console.log('Fetched tasks:', fetchedTasks);
 
-          // Use only backend calendars (no fake local-calendar IDs)
-          // Backend should have Calendar, Google Calendar, and Canvas categories
-          setCalendars(fetchedCalendars);
+          // Filter Canvas calendars based on enrollment status
+          let filteredCalendars = fetchedCalendars;
+          if (user?.ecampusToken) {
+            try {
+              const enrollments = await enrollmentsApi.listEnrollments();
+              const enabledCourseIds = new Set(
+                enrollments
+                  .filter(e => e.isSyncEnabled)
+                  .map(e => e.course.id.toString())
+              );
+
+              filteredCalendars = fetchedCalendars.filter(cal => {
+                if (cal.type !== 'ecampus') return true;
+                if (!cal.sourceId) return false;
+                return enabledCourseIds.has(cal.sourceId);
+              });
+
+              console.log('[App] Initial load - filtered calendars:', filteredCalendars);
+            } catch (error) {
+              console.error('[App] Failed to filter calendars on initial load:', error);
+            }
+          }
+
+          setCalendars(filteredCalendars);
           setSchedules(fetchedSchedules);
           setTasks(fetchedTasks);
         } catch (error) {
@@ -193,7 +215,7 @@ export default function App() {
     };
 
     fetchData();
-  }, [isLoggedIn]);
+  }, [isLoggedIn, user?.ecampusToken]);
 
   const toggleCalendarVisibility = (calendarId: string) => {
     setCalendars(prev =>
@@ -244,15 +266,58 @@ export default function App() {
       console.log('[App] Fetched schedules:', fetchedSchedules);
       console.log('[App] Schedule count:', fetchedSchedules.length);
 
-      // Show Canvas categories if they exist (can be multiple courses)
-      const canvasCalendars = fetchedCalendars.filter(cal => cal.type === 'ecampus');
-      if (canvasCalendars.length > 0) {
-        console.log('[App] Canvas calendars found:', canvasCalendars.length, canvasCalendars);
-      } else {
-        console.log('[App] No Canvas calendars found');
+      // Filter Canvas calendars based on enrollment status
+      let filteredCalendars = fetchedCalendars;
+
+      // If user has Canvas token, fetch enrollments and filter calendars
+      if (user?.ecampusToken) {
+        try {
+          const enrollments = await enrollmentsApi.listEnrollments();
+          console.log('[App] Fetched enrollments:', enrollments);
+
+          // Get enabled course IDs (these are course.id values from the Course table)
+          const enabledCourseIds = new Set(
+            enrollments
+              .filter(e => e.isSyncEnabled)
+              .map(e => e.course.id.toString())
+          );
+
+          console.log('[App] Enabled course IDs:', Array.from(enabledCourseIds));
+
+          // Filter out Canvas calendars that don't have enabled enrollments
+          filteredCalendars = fetchedCalendars.filter(cal => {
+            // Keep non-Canvas calendars (local, google)
+            if (cal.type !== 'ecampus') {
+              return true;
+            }
+
+            // For Canvas calendars, match by sourceId (which stores course.id)
+            // calendar.sourceId should equal course.id from enrollment
+            if (!cal.sourceId) {
+              console.log(`[App] Canvas calendar ${cal.name} has no sourceId, filtering out`);
+              return false;
+            }
+
+            const isEnabled = enabledCourseIds.has(cal.sourceId);
+            console.log(`[App] Canvas calendar ${cal.name} (sourceId: ${cal.sourceId}): ${isEnabled ? 'KEEP' : 'FILTER OUT'}`);
+            return isEnabled;
+          });
+
+          console.log('[App] Filtered calendars:', filteredCalendars);
+        } catch (error) {
+          console.error('[App] Failed to fetch enrollments for filtering:', error);
+          // If enrollment fetch fails, keep all calendars
+        }
       }
 
-      setCalendars(fetchedCalendars);
+      const canvasCalendars = filteredCalendars.filter(cal => cal.type === 'ecampus');
+      if (canvasCalendars.length > 0) {
+        console.log('[App] Canvas calendars after filtering:', canvasCalendars.length, canvasCalendars);
+      } else {
+        console.log('[App] No Canvas calendars after filtering');
+      }
+
+      setCalendars(filteredCalendars);
       setSchedules(fetchedSchedules);
       console.log('[App] Data refreshed successfully');
     } catch (error) {

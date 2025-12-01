@@ -25,13 +25,17 @@ const mapCategoryResponseToCalendar = (response: CategoryResponse): Calendar => 
   // Determine calendar type based on sourceType field
   let type: CalendarType = 'local';
 
-  if (response.sourceType === 'CANVAS') {
+  console.log(`[calendarsApi] Mapping category: ${response.name}, sourceType: ${response.sourceType}, sourceId: ${response.sourceId}`);
+
+  if (response.sourceType === 'CANVAS_COURSE' || response.sourceType === 'CANVAS') {
     type = 'ecampus';
-  } else if (response.sourceType === 'GOOGLE') {
+  } else if (response.sourceType === 'GOOGLE_CALENDAR' || response.sourceType === 'GOOGLE') {
     type = 'google';
-  } else if (response.sourceType === 'USER' || response.sourceType === null) {
+  } else if (response.sourceType === 'USER_CREATED' || response.sourceType === 'USER' || response.sourceType === null) {
     type = 'local';
   }
+
+  console.log(`[calendarsApi] Mapped to type: ${type}`);
 
   return {
     id: response.categoryId.toString(),
@@ -39,6 +43,7 @@ const mapCategoryResponseToCalendar = (response: CategoryResponse): Calendar => 
     type: type,
     color: response.color,
     isVisible: true, // Default to visible
+    sourceId: response.sourceId || undefined,
   };
 };
 
@@ -49,6 +54,7 @@ export const calendarsApi = {
   async listCalendars(): Promise<Calendar[]> {
     try {
       const response = await apiClient.get<CategoryResponse[]>('/v1/categories');
+      console.log('[calendarsApi.listCalendars] Raw backend response:', JSON.stringify(response.data, null, 2));
       return response.data.map(mapCategoryResponseToCalendar);
     } catch (error) {
       console.error('[calendarsApi.listCalendars] Error fetching calendars:', error);
