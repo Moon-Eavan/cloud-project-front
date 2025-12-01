@@ -223,12 +223,22 @@ const realApi = {
         return null;
       }
 
+      // Get previously stored user data to preserve ecampusToken
+      const storedUserData = localStorage.getItem('user_data');
+      const storedUser = storedUserData ? JSON.parse(storedUserData) : null;
+
       const response = await apiClient.get<User>('/v1/users/me');
 
-      // Update stored user data
-      localStorage.setItem('user_data', JSON.stringify(response.data));
+      // Merge with stored ecampusToken if backend doesn't return it
+      const user = {
+        ...response.data,
+        ecampusToken: response.data.ecampusToken || storedUser?.ecampusToken,
+      };
 
-      return response.data;
+      // Update stored user data
+      localStorage.setItem('user_data', JSON.stringify(user));
+
+      return user;
     } catch (error) {
       // If token is invalid, clear storage
       localStorage.removeItem('auth_token');
