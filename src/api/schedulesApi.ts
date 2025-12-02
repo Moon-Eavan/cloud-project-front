@@ -114,25 +114,77 @@ export const schedulesApi = {
 
   /**
    * Update an existing schedule
-   * TODO: Replace with axios.patch(`/api/schedules/${scheduleId}`, updates)
    */
   async updateSchedule(scheduleId: string, updates: Partial<Schedule>): Promise<Schedule> {
-    await delay(400);
+    try {
+      // Helper function to format date as local time (not UTC)
+      const formatLocalDateTime = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+      };
 
-    const scheduleIndex = store.schedules.findIndex((s) => s.id === scheduleId);
-    if (scheduleIndex === -1) {
-      throw new Error('일정을 찾을 수 없습니다.');
+      // Separate status updates from other field updates
+      const hasStatusUpdate = updates.isCompleted !== undefined;
+      const hasOtherUpdates = updates.title !== undefined ||
+                             updates.description !== undefined ||
+                             updates.location !== undefined ||
+                             updates.start !== undefined ||
+                             updates.end !== undefined ||
+                             updates.calendarId !== undefined;
+
+      let finalResponse: ScheduleResponse | null = null;
+
+      // 1. Update other fields first (if any)
+      if (hasOtherUpdates) {
+        const requestBody: any = {};
+
+        if (updates.title !== undefined) requestBody.title = updates.title;
+        if (updates.description !== undefined) requestBody.description = updates.description || null;
+        if (updates.location !== undefined) requestBody.location = updates.location || null;
+        if (updates.start !== undefined) requestBody.startTime = formatLocalDateTime(updates.start);
+        if (updates.end !== undefined) requestBody.endTime = formatLocalDateTime(updates.end);
+        if (updates.calendarId !== undefined) requestBody.categoryId = parseInt(updates.calendarId);
+
+        // Need to provide required fields for PUT request
+        // Get current schedule to fill in required fields
+        const currentSchedule = await apiClient.get<ScheduleResponse>(`/v1/schedules/${scheduleId}`);
+
+        // Fill in required fields if not provided
+        if (!requestBody.title) requestBody.title = currentSchedule.data.title;
+        if (!requestBody.startTime) requestBody.startTime = currentSchedule.data.startTime;
+        if (!requestBody.endTime) requestBody.endTime = currentSchedule.data.endTime;
+        if (!requestBody.categoryId) requestBody.categoryId = currentSchedule.data.categoryId;
+
+        const response = await apiClient.put<ScheduleResponse>(`/v1/schedules/${scheduleId}`, requestBody);
+        finalResponse = response.data;
+      }
+
+      // 2. Update status separately (if needed)
+      if (hasStatusUpdate) {
+        const status = updates.isCompleted ? 'DONE' : 'TODO';
+        const response = await apiClient.patch<ScheduleResponse>(
+          `/v1/schedules/${scheduleId}/status`,
+          { status }
+        );
+        finalResponse = response.data;
+      }
+
+      // If we didn't make any API calls (shouldn't happen, but just in case)
+      if (!finalResponse) {
+        const response = await apiClient.get<ScheduleResponse>(`/v1/schedules/${scheduleId}`);
+        finalResponse = response.data;
+      }
+
+      return mapScheduleResponseToSchedule(finalResponse);
+    } catch (error) {
+      console.error('[schedulesApi.updateSchedule] Error updating schedule:', error);
+      throw error;
     }
-
-    // Check if schedule belongs to E-Campus (read-only)
-    const schedule = store.schedules[scheduleIndex];
-    const calendar = store.calendars.find((c) => c.id === schedule.calendarId);
-    if (calendar?.type === 'ecampus') {
-      throw new Error('E-Campus 캘린더의 일정은 수정할 수 없습니다.');
-    }
-
-    store.schedules[scheduleIndex] = { ...store.schedules[scheduleIndex], ...updates };
-    return store.schedules[scheduleIndex];
   },
 
   /**
