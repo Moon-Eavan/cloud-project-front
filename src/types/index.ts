@@ -71,10 +71,18 @@ export interface FriendRequest {
 }
 
 // Group Types
+export interface GroupMember {
+  id: string; // cognitoSub
+  name: string;
+  email: string;
+  role: 'OWNER' | 'ADMIN' | 'MEMBER';
+}
+
 export interface Group {
   id: string;
   name: string;
-  memberIds: string[]; // User IDs
+  memberIds: string[]; // User IDs (cognitoSub)
+  members?: GroupMember[]; // Full member info from backend
   createdBy: string; // User ID
   createdAt: Date;
 }

@@ -9,33 +9,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { groupsApi, schedulesApi } from '@/api';
+import { groupsApi, friendsApi } from '@/api';
 import type { Group, GroupSchedule, Friend, Schedule } from '@/types';
 import When2MeetScheduler from '@/components/When2MeetScheduler';
-
-const initialFriends: Friend[] = [
-  {
-    id: 'friend-1',
-    name: '김민수',
-    email: 'minsu.kim@example.com',
-    profileImage: undefined,
-    status: 'accepted',
-  },
-  {
-    id: 'friend-2',
-    name: '이지은',
-    email: 'jieun.lee@example.com',
-    profileImage: undefined,
-    status: 'accepted',
-  },
-  {
-    id: 'friend-3',
-    name: '박서준',
-    email: 'seojun.park@example.com',
-    profileImage: undefined,
-    status: 'accepted',
-  },
-];
 
 interface GroupsPageProps {
   schedules: Schedule[];
@@ -45,7 +21,8 @@ interface GroupsPageProps {
 export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps) {
   const [groups, setGroups] = useState<Group[]>([]);
   const [groupSchedules, setGroupSchedules] = useState<GroupSchedule[]>([]);
-  const [friends, setFriends] = useState<Friend[]>(initialFriends);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isGroupDialogOpen, setIsGroupDialogOpen] = useState(false);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [isCoordinationDialogOpen, setIsCoordinationDialogOpen] = useState(false);
@@ -63,7 +40,8 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
     return `${hours}:00`;
   };
   const getCurrentHourPlus2 = () => {
-    const hours = (new Date().getHours() + 2).toString().padStart(2, '0');
+    const currentHour = new Date().getHours();
+    const hours = Math.min(currentHour + 2, 23).toString().padStart(2, '0');
     return `${hours}:00`;
   };
 
@@ -88,19 +66,30 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
 
   const loadData = async () => {
     try {
-      const groupsData = await groupsApi.listGroups();
+      setIsLoading(true);
+
+      // Load friends and groups in parallel
+      const [friendsData, groupsData] = await Promise.all([
+        friendsApi.listFriends(),
+        groupsApi.listGroups(),
+      ]);
+
+      setFriends(friendsData);
       setGroups(groupsData);
 
       // Load all group schedules
-      const allSchedules: GroupSchedule[] = [];
-      for (const group of groupsData) {
-        const schedules = await groupsApi.getGroupSchedules(group.id);
-        allSchedules.push(...schedules);
-      }
-      setGroupSchedules(allSchedules);
-    } catch (error) {
-      console.error('Failed to load groups:', error);
-      toast.error('데이터 로드 실패');
+      // Note: Group schedules are not yet implemented in backend
+      // const allSchedules: GroupSchedule[] = [];
+      // for (const group of groupsData) {
+      //   const schedules = await groupsApi.getGroupSchedules(group.id);
+      //   allSchedules.push(...schedules);
+      // }
+      // setGroupSchedules(allSchedules);
+    } catch (error: any) {
+      console.error('Failed to load data:', error);
+      toast.error(error.message || '데이터 로드 실패');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -186,26 +175,35 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
     return groupSchedules.filter((s) => s.groupId === groupId);
   };
 
-  const handleOpenEventDialog = (group: Group) => {
-    setSelectedGroup(group);
-    setNewEvent({
-      title: '',
-      description: '',
-      date: getTodayDate(),
-      startTime: getCurrentHour(),
-      endTime: getCurrentHourPlus2(),
-      location: '',
-      members: [],
-    });
-    setIsEventDialogOpen(true);
+  const handleOpenEventDialog = async (group: Group) => {
+    // Fetch fresh group details to ensure we have member information
+    try {
+      const freshGroup = await groupsApi.getGroup(group.id);
+      setSelectedGroup(freshGroup);
+      setNewEvent({
+        title: '',
+        description: '',
+        date: getTodayDate(),
+        startTime: getCurrentHour(),
+        endTime: getCurrentHourPlus2(),
+        location: '',
+        members: [],
+      });
+      setIsEventDialogOpen(true);
+    } catch (error: any) {
+      console.error('Failed to load group details:', error);
+      toast.error('그룹 정보를 불러오는데 실패했습니다.');
+    }
   };
 
   const handleOpenCoordinationDialog = async (group: Group) => {
-    setSelectedGroup(group);
-    setIsCoordinationDialogOpen(true);
-
-    // 그룹 멤버들의 일정을 미리 로드
+    // Fetch fresh group details to ensure we have member information
     try {
+      const freshGroup = await groupsApi.getGroup(group.id);
+      setSelectedGroup(freshGroup);
+      setIsCoordinationDialogOpen(true);
+
+      // 그룹 멤버들의 일정을 미리 로드
       setCoordination({ memberSchedules: [], isLoading: true });
 
       // 현재 날짜 기준 한 달 기간으로 일정 조회
@@ -219,7 +217,7 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
       endDate.setHours(23, 59, 59, 999);
 
       const memberSchedules = await groupsApi.getMemberSchedulesForCoordination({
-        memberIds: group.memberIds,
+        memberIds: freshGroup.memberIds,
         period: {
           start: startDate,
           end: endDate,
@@ -387,27 +385,32 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
               />
             </div>
             <div>
-              <Label>참여 멤버 선택 ({newEvent.members.length}/{selectedGroup?.memberIds.length || 0})</Label>
+              <Label>참여 멤버 선택 ({newEvent.members.length}/{selectedGroup?.members?.length || 0})</Label>
               <div className="grid grid-cols-2 gap-3 mt-2 max-h-40 overflow-y-auto">
-                {selectedGroup?.memberIds.map((memberId) => {
-                  const friend = friends.find((f) => f.id === memberId);
-                  // 현재 사용자인 경우 "나"로 표시
-                  const displayName = memberId === 'current-user-id' ? '나' : (friend?.name || '알 수 없음');
+                {selectedGroup?.members?.map((member) => {
                   return (
-                    <div
-                      key={memberId}
+                    <label
+                      key={member.id}
                       className="flex items-center space-x-3 p-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer"
-                      onClick={() => {
-                        const isSelected = newEvent.members.includes(memberId);
-                        setNewEvent({
-                          ...newEvent,
-                          members: isSelected ? newEvent.members.filter((m) => m !== memberId) : [...newEvent.members, memberId],
-                        });
-                      }}
                     >
-                      <Checkbox checked={newEvent.members.includes(memberId)} />
-                      <label className="cursor-pointer flex-1 text-sm">{displayName}</label>
-                    </div>
+                      <Checkbox
+                        checked={newEvent.members.includes(member.id)}
+                        onCheckedChange={(checked) => {
+                          if (checked) {
+                            setNewEvent({
+                              ...newEvent,
+                              members: [...newEvent.members, member.id],
+                            });
+                          } else {
+                            setNewEvent({
+                              ...newEvent,
+                              members: newEvent.members.filter((m) => m !== member.id),
+                            });
+                          }
+                        }}
+                      />
+                      <span className="flex-1 text-sm">{member.name}</span>
+                    </label>
                   );
                 })}
               </div>
@@ -435,14 +438,10 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
               <When2MeetScheduler
                 groupName={selectedGroup?.name || ''}
                 groupMembers={
-                  selectedGroup?.memberIds.map((memberId) => {
-                    const friend = friends.find((f) => f.id === memberId);
-                    const displayName = memberId === 'current-user-id' ? '나' : (friend?.name || '알 수 없음');
-                    return {
-                      id: memberId,
-                      name: displayName,
-                    };
-                  }) || []
+                  selectedGroup?.members?.map((member) => ({
+                    id: member.id,
+                    name: member.name,
+                  })) || []
                 }
                 memberSchedules={coordination.memberSchedules}
                 onTimeSelected={handleTimeSelected}
@@ -454,7 +453,11 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
       </Dialog>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {groups.length === 0 ? (
+        {isLoading ? (
+          <div className="col-span-full text-center py-12 text-gray-500">
+            <p>로딩 중...</p>
+          </div>
+        ) : groups.length === 0 ? (
           <div className="col-span-full text-center py-12 text-gray-500">
             <Users className="w-16 h-16 mx-auto mb-4 text-gray-300" />
             <p>그룹이 없습니다</p>
@@ -481,19 +484,14 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <p className="text-sm text-slate-500 mb-2">멤버 ({group.memberIds.length})</p>
+                      <p className="text-sm text-slate-500 mb-2">멤버 ({group.members?.length || group.memberIds.length})</p>
                       <div className="flex flex-wrap gap-2">
-                        {group.memberIds.slice(0, 3).map((memberId, idx) => {
-                          const friend = friends.find((f) => f.id === memberId);
-                          // 현재 사용자인 경우 "나"로 표시
-                          const displayName = memberId === 'current-user-id' ? '나' : (friend?.name || '알 수 없음');
-                          return (
-                            <Badge key={idx} variant="secondary">
-                              {displayName}
-                            </Badge>
-                          );
-                        })}
-                        {group.memberIds.length > 3 && <Badge variant="secondary">+{group.memberIds.length - 3}</Badge>}
+                        {(group.members?.slice(0, 3) || []).map((member, idx) => (
+                          <Badge key={idx} variant="secondary">
+                            {member.name}
+                          </Badge>
+                        ))}
+                        {(group.members?.length || 0) > 3 && <Badge variant="secondary">+{(group.members?.length || 0) - 3}</Badge>}
                       </div>
                     </div>
                     <div>

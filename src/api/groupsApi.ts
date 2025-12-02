@@ -1,237 +1,275 @@
 // Groups API
-// Currently uses mock in-memory storage
-// TODO: Replace with real axios-based HTTP calls to backend
+import apiClient from './client';
+import type { Group, GroupMember, GroupSchedule, Schedule, ScheduleCoordination, MemberScheduleInfo } from '@/types';
 
-import type { Group, GroupSchedule, Schedule, ScheduleCoordination, MemberScheduleInfo } from '@/types';
-import { store, generateId } from '@/mocks/mockStore';
+// Backend response types
+interface UserSummary {
+  cognitoSub: string;
+  name: string;
+  email: string;
+  isFriend: boolean | null;
+  isPending: boolean | null;
+}
 
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+interface GroupResponse {
+  groupId: number;
+  name: string;
+  description?: string;
+  owner: UserSummary;
+  myRole: 'OWNER' | 'ADMIN' | 'MEMBER';
+  memberCount: number;
+  createdAt: string;
+}
+
+interface GroupDetailResponse {
+  groupId: number;
+  name: string;
+  description?: string;
+  createdAt: string;
+  members: MemberResponse[];
+}
+
+interface MemberResponse {
+  memberId: number;
+  user: UserSummary;
+  role: 'OWNER' | 'ADMIN' | 'MEMBER';
+  joinedAt: string;
+}
+
+interface MessageResponse {
+  message: string;
+}
+
+// Convert backend GroupResponse to frontend Group type
+const mapGroupResponseToGroup = (response: GroupResponse): Group => {
+  return {
+    id: response.groupId.toString(),
+    name: response.name,
+    memberIds: [], // Will be filled from detail response if needed
+    createdBy: '', // Not provided in list response
+    createdAt: new Date(response.createdAt),
+  };
+};
+
+// Convert backend MemberResponse to frontend GroupMember type
+const mapMemberResponseToGroupMember = (response: MemberResponse): GroupMember => {
+  return {
+    id: response.user.cognitoSub,
+    name: response.user.name,
+    email: response.user.email,
+    role: response.role,
+  };
+};
+
+// Convert backend GroupDetailResponse to frontend Group type
+const mapGroupDetailToGroup = (response: GroupDetailResponse): Group => {
+  return {
+    id: response.groupId.toString(),
+    name: response.name,
+    memberIds: response.members.map(m => m.user.cognitoSub),
+    members: response.members.map(mapMemberResponseToGroupMember),
+    createdBy: response.members.find(m => m.role === 'OWNER')?.user.cognitoSub || '',
+    createdAt: new Date(response.createdAt),
+  };
+};
 
 export const groupsApi = {
   /**
    * Get all groups for current user
-   * TODO: Replace with axios.get('/api/groups')
    */
   async listGroups(): Promise<Group[]> {
-    await delay(300);
+    try {
+      const response = await apiClient.get<GroupResponse[]>('/v1/groups');
 
-    if (!store.currentUser) {
-      throw new Error('로그인이 필요합니다.');
+      // For each group, fetch details to get full member list
+      const groupPromises = response.data.map(async (groupResponse) => {
+        try {
+          const detailResponse = await apiClient.get<GroupDetailResponse>(`/v1/groups/${groupResponse.groupId}`);
+          return mapGroupDetailToGroup(detailResponse.data);
+        } catch (error) {
+          console.error(`[groupsApi.listGroups] Failed to fetch details for group ${groupResponse.groupId}:`, error);
+          // Fallback: return group with basic info
+          return mapGroupResponseToGroup(groupResponse);
+        }
+      });
+
+      return await Promise.all(groupPromises);
+    } catch (error) {
+      console.error('[groupsApi.listGroups] Error fetching groups:', error);
+      throw error;
     }
-
-    return store.groups.filter((g) => g.memberIds.includes(store.currentUser!.id));
   },
 
   /**
-   * Create a new group (spec 5.2)
+   * Create a new group
    * Members must be from friend list
-   * TODO: Replace with axios.post('/api/groups', groupData)
    */
-  async createGroup(name: string, memberIds: string[]): Promise<Group> {
-    await delay(400);
+  async createGroup(name: string, memberCognitoSubs: string[]): Promise<Group> {
+    try {
+      // 1. Create group (only name and description)
+      const response = await apiClient.post<GroupResponse>('/v1/groups', {
+        name,
+        description: '',
+      });
 
-    if (!store.currentUser) {
-      throw new Error('로그인이 필요합니다.');
-    }
+      const groupId = response.data.groupId;
 
-    // Validate that all members are friends
-    const friendIds = store.friends.filter((f) => f.status === 'accepted').map((f) => f.id);
+      // 2. Invite each member separately
+      if (memberCognitoSubs.length > 0) {
+        const invitePromises = memberCognitoSubs.map(cognitoSub =>
+          apiClient.post<MemberResponse>(`/v1/groups/${groupId}/members`, {
+            userCognitoSub: cognitoSub,
+            role: 'MEMBER',
+          }).catch(error => {
+            console.error(`[groupsApi.createGroup] Failed to invite ${cognitoSub}:`, error);
+            // Don't throw - continue with other invites
+            return null;
+          })
+        );
 
-    for (const memberId of memberIds) {
-      if (memberId !== store.currentUser.id && !friendIds.includes(memberId)) {
-        throw new Error('그룹 멤버는 친구 목록에 있는 사용자만 선택할 수 있습니다.');
+        await Promise.all(invitePromises);
       }
+
+      // 3. Fetch group details to get full member information
+      const detailResponse = await apiClient.get<GroupDetailResponse>(`/v1/groups/${groupId}`);
+      return mapGroupDetailToGroup(detailResponse.data);
+    } catch (error: any) {
+      console.error('[groupsApi.createGroup] Error creating group:', error);
+      const message = error.response?.data?.message || error.response?.data?.error || '그룹 생성에 실패했습니다.';
+      throw new Error(message);
     }
-
-    // Ensure current user is in the group
-    const allMemberIds = Array.from(new Set([store.currentUser.id, ...memberIds]));
-
-    const newGroup: Group = {
-      id: generateId(),
-      name,
-      memberIds: allMemberIds,
-      createdBy: store.currentUser.id,
-      createdAt: new Date(),
-    };
-
-    store.groups.push(newGroup);
-
-    return newGroup;
   },
 
   /**
    * Get group by ID
-   * TODO: Replace with axios.get(`/api/groups/${groupId}`)
    */
   async getGroup(groupId: string): Promise<Group> {
-    await delay(200);
-
-    const group = store.groups.find((g) => g.id === groupId);
-    if (!group) {
-      throw new Error('그룹을 찾을 수 없습니다.');
+    try {
+      const response = await apiClient.get<GroupDetailResponse>(`/v1/groups/${groupId}`);
+      return mapGroupDetailToGroup(response.data);
+    } catch (error) {
+      console.error('[groupsApi.getGroup] Error fetching group:', error);
+      throw error;
     }
-
-    return group;
   },
 
   /**
-   * Create group schedule (spec 6.1 - direct add)
-   * Creates schedule in each member's calendar
-   * Sends notifications to members
-   * TODO: Replace with axios.post(`/api/groups/${groupId}/schedules`, scheduleData)
+   * Get group members
+   */
+  async getGroupMembers(groupId: string): Promise<MemberResponse[]> {
+    try {
+      const response = await apiClient.get<MemberResponse[]>(`/v1/groups/${groupId}/members`);
+      return response.data;
+    } catch (error) {
+      console.error('[groupsApi.getGroupMembers] Error fetching group members:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Invite member to group
+   */
+  async inviteMember(groupId: string, userCognitoSub: string): Promise<MemberResponse> {
+    try {
+      const response = await apiClient.post<MemberResponse>(`/v1/groups/${groupId}/members`, {
+        userCognitoSub,
+      });
+      return response.data;
+    } catch (error: any) {
+      console.error('[groupsApi.inviteMember] Error inviting member:', error);
+      const message = error.response?.data?.message || error.response?.data?.error || '멤버 초대에 실패했습니다.';
+      throw new Error(message);
+    }
+  },
+
+  /**
+   * Remove member from group
+   */
+  async removeMember(groupId: string, memberId: string): Promise<void> {
+    try {
+      await apiClient.delete<MessageResponse>(`/v1/groups/${groupId}/members/${memberId}`);
+    } catch (error: any) {
+      console.error('[groupsApi.removeMember] Error removing member:', error);
+      const message = error.response?.data?.message || error.response?.data?.error || '멤버 제거에 실패했습니다.';
+      throw new Error(message);
+    }
+  },
+
+  /**
+   * Leave group
+   */
+  async leaveGroup(groupId: string): Promise<void> {
+    try {
+      await apiClient.post<MessageResponse>(`/v1/groups/${groupId}/leave`);
+    } catch (error: any) {
+      console.error('[groupsApi.leaveGroup] Error leaving group:', error);
+      const message = error.response?.data?.message || error.response?.data?.error || '그룹 탈퇴에 실패했습니다.';
+      throw new Error(message);
+    }
+  },
+
+  /**
+   * Delete group (owner only)
+   */
+  async deleteGroup(groupId: string): Promise<void> {
+    try {
+      await apiClient.delete<MessageResponse>(`/v1/groups/${groupId}`);
+    } catch (error: any) {
+      console.error('[groupsApi.deleteGroup] Error deleting group:', error);
+      const message = error.response?.data?.message || error.response?.data?.error || '그룹 삭제에 실패했습니다.';
+      throw new Error(message);
+    }
+  },
+
+  /**
+   * Update group information
+   */
+  async updateGroup(groupId: string, name: string, description?: string): Promise<Group> {
+    try {
+      const response = await apiClient.put<GroupResponse>(`/v1/groups/${groupId}`, {
+        name,
+        description: description || '',
+      });
+
+      // Fetch group details to get full member information
+      const detailResponse = await apiClient.get<GroupDetailResponse>(`/v1/groups/${groupId}`);
+      return mapGroupDetailToGroup(detailResponse.data);
+    } catch (error: any) {
+      console.error('[groupsApi.updateGroup] Error updating group:', error);
+      const message = error.response?.data?.message || error.response?.data?.error || '그룹 수정에 실패했습니다.';
+      throw new Error(message);
+    }
+  },
+
+  // Note: Group schedule and coordination features are not yet implemented in backend
+  // The following methods are placeholders for future implementation
+
+  /**
+   * Create group schedule (Not yet implemented in backend)
+   * TODO: Implement when backend supports group schedules
    */
   async createGroupSchedule(
     groupId: string,
     scheduleData: Omit<GroupSchedule, 'id' | 'groupId' | 'createdBy' | 'createdAt'>
   ): Promise<GroupSchedule> {
-    await delay(500);
-
-    if (!store.currentUser) {
-      throw new Error('로그인이 필요합니다.');
-    }
-
-    const group = store.groups.find((g) => g.id === groupId);
-    if (!group) {
-      throw new Error('그룹을 찾을 수 없습니다.');
-    }
-
-    const newGroupSchedule: GroupSchedule = {
-      ...scheduleData,
-      id: generateId(),
-      groupId,
-      createdBy: store.currentUser.id,
-      createdAt: new Date(),
-    };
-
-    store.groupSchedules.push(newGroupSchedule);
-
-    // Create schedule in each member's calendar
-    for (const memberId of scheduleData.memberIds) {
-      const memberSchedule: Schedule = {
-        id: generateId(),
-        title: scheduleData.title,
-        description: scheduleData.description || '',
-        start: scheduleData.start,
-        end: scheduleData.end,
-        location: scheduleData.location,
-        isCompleted: false,
-        calendarId: 'cal-local', // Add to local calendar
-      };
-
-      store.schedules.push(memberSchedule);
-
-      // TODO: Create notification for each member (except creator)
-      // This will be handled by notificationsApi
-    }
-
-    return newGroupSchedule;
+    throw new Error('그룹 일정 생성 기능은 아직 구현되지 않았습니다.');
   },
 
   /**
-   * Get member schedules for coordination (spec 6.2.2)
-   * Returns schedules within the period for selected members
-   * TODO: Replace with axios.post('/api/groups/coordinate/schedules', coordinationData)
+   * Get member schedules for coordination (Not yet implemented in backend)
+   * TODO: Implement when backend supports schedule coordination
    */
   async getMemberSchedulesForCoordination(
     coordination: ScheduleCoordination
   ): Promise<MemberScheduleInfo[]> {
-    await delay(500);
-
-    const { memberIds, period } = coordination;
-    const memberSchedules: MemberScheduleInfo[] = [];
-
-    for (const memberId of memberIds) {
-      // Find user from either currentUser, users, or friends
-      let userName = '알 수 없음';
-
-      if (memberId === store.currentUser?.id) {
-        userName = store.currentUser.name;
-      } else {
-        const user = store.users.find((u) => u.id === memberId);
-        if (user) {
-          userName = user.name;
-        } else {
-          const friend = store.friends.find((f) => f.id === memberId);
-          if (friend) {
-            userName = friend.name || '알 수 없음';
-          }
-        }
-      }
-
-      // Get user's schedules within the period
-      // TODO: When backend is connected, this should query the specific user's schedules
-      // For now, we simulate different schedules for each member for testing
-      let userSchedules = store.schedules.filter((s) => {
-        const scheduleStart = new Date(s.start);
-        const scheduleEnd = new Date(s.end);
-
-        return (
-          (scheduleStart >= period.start && scheduleStart <= period.end) ||
-          (scheduleEnd >= period.start && scheduleEnd <= period.end) ||
-          (scheduleStart <= period.start && scheduleEnd >= period.end)
-        );
-      });
-
-      // Simulate different schedules for different members (for testing only)
-      // In production, backend will return each user's actual schedules
-      if (memberId === 'current-user-id') {
-        // Current user sees their own schedules (cal-google and cal-local)
-        userSchedules = userSchedules.filter(s =>
-          s.calendarId === 'cal-google' || s.calendarId === 'cal-local'
-        );
-      } else if (memberId === 'friend-1') {
-        // Friend 1 has some schedules
-        userSchedules = userSchedules.filter(s =>
-          s.calendarId === 'cal-local' || s.calendarId === 'cal-ecampus'
-        );
-      } else if (memberId === 'friend-2') {
-        // Friend 2 has different schedules
-        userSchedules = userSchedules.filter(s => s.calendarId === 'cal-ecampus');
-      } else {
-        // Other friends have minimal schedules
-        userSchedules = userSchedules.slice(0, 1);
-      }
-
-      memberSchedules.push({
-        userId: memberId,
-        userName,
-        schedules: userSchedules,
-      });
-    }
-
-    return memberSchedules;
+    throw new Error('일정 조율 기능은 아직 구현되지 않았습니다.');
   },
 
   /**
-   * Get schedules for a group
-   * TODO: Replace with axios.get(`/api/groups/${groupId}/schedules`)
+   * Get schedules for a group (Not yet implemented in backend)
+   * TODO: Implement when backend supports group schedules
    */
   async getGroupSchedules(groupId: string): Promise<GroupSchedule[]> {
-    await delay(300);
-
-    return store.groupSchedules.filter((s) => s.groupId === groupId);
-  },
-
-  /**
-   * Delete group
-   * TODO: Replace with axios.delete(`/api/groups/${groupId}`)
-   */
-  async deleteGroup(groupId: string): Promise<void> {
-    await delay(300);
-
-    const groupIndex = store.groups.findIndex((g) => g.id === groupId);
-    if (groupIndex === -1) {
-      throw new Error('그룹을 찾을 수 없습니다.');
-    }
-
-    // Only creator can delete
-    if (store.groups[groupIndex].createdBy !== store.currentUser?.id) {
-      throw new Error('그룹을 삭제할 권한이 없습니다.');
-    }
-
-    store.groups.splice(groupIndex, 1);
-
-    // Also delete associated group schedules
-    store.groupSchedules = store.groupSchedules.filter((s) => s.groupId !== groupId);
+    throw new Error('그룹 일정 조회 기능은 아직 구현되지 않았습니다.');
   },
 };
