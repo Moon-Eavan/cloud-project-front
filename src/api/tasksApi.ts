@@ -180,18 +180,28 @@ export const tasksApi = {
 
   /**
    * Update task details
+   * Backend requires full TodoRequest object via PUT
    */
   async updateTask(taskId: string, updates: Partial<Task>): Promise<Task> {
     try {
-      const requestBody: any = {};
+      // First, fetch the current task to get all fields
+      const currentTaskResponse = await apiClient.get<TodoResponse>(`/v1/todos/${taskId}`);
+      const currentTask = currentTaskResponse.data;
 
-      if (updates.title !== undefined) requestBody.title = updates.title;
-      if (updates.description !== undefined) requestBody.description = updates.description || null;
-      if (updates.startDate !== undefined) requestBody.startDate = formatDateToString(updates.startDate);
-      if (updates.endDate !== undefined) requestBody.dueDate = formatDateToString(updates.endDate);
-      if (updates.status !== undefined) requestBody.status = mapFrontendStatusToBackend(updates.status);
+      // Merge updates with current task data
+      const requestBody = {
+        title: updates.title !== undefined ? updates.title : currentTask.title,
+        description: updates.description !== undefined ? (updates.description || null) : currentTask.description,
+        startDate: updates.startDate !== undefined ? formatDateToString(updates.startDate) : currentTask.startDate,
+        dueDate: updates.endDate !== undefined ? formatDateToString(updates.endDate) : currentTask.dueDate,
+        categoryId: currentTask.categoryId,
+        scheduleId: currentTask.scheduleId,
+        priority: currentTask.priority || 'MEDIUM',
+        groupId: currentTask.groupId,
+      };
 
-      const response = await apiClient.patch<TodoResponse>(`/v1/todos/${taskId}`, requestBody);
+      console.log('[tasksApi.updateTask] Request body:', requestBody);
+      const response = await apiClient.put<TodoResponse>(`/v1/todos/${taskId}`, requestBody);
       return mapTodoResponseToTask(response.data);
     } catch (error) {
       console.error('[tasksApi.updateTask] Error updating task:', error);

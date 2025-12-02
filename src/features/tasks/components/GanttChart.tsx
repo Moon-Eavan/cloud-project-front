@@ -29,7 +29,9 @@ interface ProjectView {
 export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
   const [isProjectDialogOpen, setIsProjectDialogOpen] = useState(false);
   const [isSubTaskDialogOpen, setIsSubTaskDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [projectViews, setProjectViews] = useState<ProjectView[]>([]);
 
   // 기본값: 시작일 = 오늘, 종료일 = 내일
@@ -279,6 +281,33 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
     }
   };
 
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateTask = async () => {
+    if (!editingTask) return;
+
+    try {
+      const updates: Partial<Task> = {
+        title: editingTask.title,
+        description: editingTask.description,
+        startDate: editingTask.startDate,
+        endDate: editingTask.endDate,
+      };
+
+      const updatedTask = await tasksApi.updateTask(editingTask.id, updates);
+      setTasks(tasks.map(t => t.id === editingTask.id ? updatedTask : t));
+      setIsEditDialogOpen(false);
+      setEditingTask(null);
+      toast.success('작업이 수정되었습니다.');
+    } catch (error) {
+      console.error('Failed to update task:', error);
+      toast.error('작업 수정에 실패했습니다.');
+    }
+  };
+
   const getBarPosition = (startDate: Date, endDate: Date) => {
     const startOffset = Math.max(
       0,
@@ -411,6 +440,59 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>작업 수정</DialogTitle>
+            <DialogDescription>작업 정보를 수정합니다.</DialogDescription>
+          </DialogHeader>
+          {editingTask && (
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="edit-title">제목</Label>
+                <Input
+                  id="edit-title"
+                  value={editingTask.title}
+                  onChange={(e) => setEditingTask({ ...editingTask, title: e.target.value })}
+                  placeholder="작업 제목을 입력하세요"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-description">설명</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editingTask.description}
+                  onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
+                  placeholder="작업 설명을 입력하세요"
+                  className="min-h-[120px]"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-start">시작 날짜</Label>
+                <Input
+                  id="edit-start"
+                  type="date"
+                  value={editingTask.startDate.toISOString().split('T')[0]}
+                  onChange={(e) => setEditingTask({ ...editingTask, startDate: new Date(e.target.value) })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-end">종료 날짜</Label>
+                <Input
+                  id="edit-end"
+                  type="date"
+                  value={editingTask.endDate.toISOString().split('T')[0]}
+                  onChange={(e) => setEditingTask({ ...editingTask, endDate: new Date(e.target.value) })}
+                />
+              </div>
+              <Button onClick={handleUpdateTask} className="w-full bg-blue-500 hover:bg-blue-600">
+                수정
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <Card className="p-6 bg-white/60 backdrop-blur-sm shadow-lg border border-gray-200 rounded-2xl relative">
         <div 
           className="overflow-x-auto gantt-scrollbar cursor-grab active:cursor-grabbing" 
@@ -492,6 +574,9 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEditTask(project)}>
+                            수정
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => toggleTaskComplete(project.id)}>
                             {project.status === 'done' ? 'Done 취소' : 'Done으로 변경'}
                           </DropdownMenuItem>
@@ -535,6 +620,9 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleEditTask(subTask)}>
+                                  수정
+                                </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => toggleTaskComplete(subTask.id)}>
                                   {subTask.status === 'done' ? 'Done 취소' : 'Done으로 변경'}
                                 </DropdownMenuItem>

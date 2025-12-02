@@ -23,6 +23,8 @@ interface KanbanBoardProps {
 
 export default function KanbanBoard({ tasks, setTasks }: KanbanBoardProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   // 기본값: 시작일 = 오늘, 종료일 = 내일
   const getDefaultDates = () => {
@@ -102,6 +104,33 @@ export default function KanbanBoard({ tasks, setTasks }: KanbanBoardProps) {
     }
   };
 
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateTask = async () => {
+    if (!editingTask) return;
+
+    try {
+      const updates: Partial<Task> = {
+        title: editingTask.title,
+        description: editingTask.description,
+        startDate: editingTask.startDate,
+        endDate: editingTask.endDate,
+      };
+
+      const updatedTask = await tasksApi.updateTask(editingTask.id, updates);
+      setTasks(tasks.map((t) => (t.id === editingTask.id ? updatedTask : t)));
+      setIsEditDialogOpen(false);
+      setEditingTask(null);
+      toast.success('작업이 수정되었습니다.');
+    } catch (error) {
+      console.error('Failed to update task:', error);
+      toast.error('작업 수정에 실패했습니다.');
+    }
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -175,6 +204,58 @@ export default function KanbanBoard({ tasks, setTasks }: KanbanBoardProps) {
         </Dialog>
       </div>
 
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>작업 수정</DialogTitle>
+            <DialogDescription>작업 정보를 수정합니다.</DialogDescription>
+          </DialogHeader>
+          {editingTask && (
+            <div className="space-y-4 py-4">
+              <div>
+                <Label htmlFor="edit-title">제목</Label>
+                <Input
+                  id="edit-title"
+                  value={editingTask.title}
+                  onChange={(e) => setEditingTask({ ...editingTask, title: e.target.value })}
+                  placeholder="작업 제목을 입력하세요"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-description">설명</Label>
+                <Textarea
+                  id="edit-description"
+                  value={editingTask.description}
+                  onChange={(e) => setEditingTask({ ...editingTask, description: e.target.value })}
+                  placeholder="작업 설명을 입력하세요"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-startDate">시작 날짜</Label>
+                <Input
+                  id="edit-startDate"
+                  type="date"
+                  value={editingTask.startDate.toISOString().split('T')[0]}
+                  onChange={(e) => setEditingTask({ ...editingTask, startDate: new Date(e.target.value) })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-endDate">종료 날짜</Label>
+                <Input
+                  id="edit-endDate"
+                  type="date"
+                  value={editingTask.endDate.toISOString().split('T')[0]}
+                  onChange={(e) => setEditingTask({ ...editingTask, endDate: new Date(e.target.value) })}
+                />
+              </div>
+              <Button onClick={handleUpdateTask} className="w-full bg-blue-500 hover:bg-blue-600">
+                수정
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {columns.map((column) => (
           <div key={column.id}>
@@ -206,6 +287,9 @@ export default function KanbanBoard({ tasks, setTasks }: KanbanBoardProps) {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleEditTask(task)}>
+                                  수정
+                                </DropdownMenuItem>
                                 {columns
                                   .filter((col) => col.id !== task.status)
                                   .map((col) => (
