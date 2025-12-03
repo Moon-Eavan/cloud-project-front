@@ -578,6 +578,7 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
             ) : (
               <When2MeetScheduler
                 groupName={selectedGroup?.name || ''}
+                groupId={selectedGroup?.id}
                 groupMembers={
                   selectedGroup?.members?.map((member) => ({
                     id: member.id,
