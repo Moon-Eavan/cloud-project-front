@@ -1,6 +1,6 @@
 // Groups API
 import apiClient from './client';
-import type { Group, GroupMember, GroupSchedule, Schedule, ScheduleCoordination, MemberScheduleInfo } from '@/types';
+import type { Group, GroupMember } from '@/types';
 
 // Backend response types
 interface UserSummary {
@@ -241,35 +241,42 @@ export const groupsApi = {
     }
   },
 
-  // Note: Group schedule and coordination features are not yet implemented in backend
-  // The following methods are placeholders for future implementation
-
   /**
-   * Create group schedule (Not yet implemented in backend)
-   * TODO: Implement when backend supports group schedules
+   * Find free time slots for group members
    */
-  async createGroupSchedule(
-    groupId: string,
-    scheduleData: Omit<GroupSchedule, 'id' | 'groupId' | 'createdBy' | 'createdAt'>
-  ): Promise<GroupSchedule> {
-    throw new Error('그룹 일정 생성 기능은 아직 구현되지 않았습니다.');
-  },
-
-  /**
-   * Get member schedules for coordination (Not yet implemented in backend)
-   * TODO: Implement when backend supports schedule coordination
-   */
-  async getMemberSchedulesForCoordination(
-    coordination: ScheduleCoordination
-  ): Promise<MemberScheduleInfo[]> {
-    throw new Error('일정 조율 기능은 아직 구현되지 않았습니다.');
-  },
-
-  /**
-   * Get schedules for a group (Not yet implemented in backend)
-   * TODO: Implement when backend supports group schedules
-   */
-  async getGroupSchedules(groupId: string): Promise<GroupSchedule[]> {
-    throw new Error('그룹 일정 조회 기능은 아직 구현되지 않았습니다.');
+  async findFreeSlots(request: {
+    groupId: number;
+    userIds?: string[];
+    startDate: string; // YYYY-MM-DD
+    endDate: string; // YYYY-MM-DD
+    minDurationMinutes: number;
+    workingHoursStart?: string; // HH:mm
+    workingHoursEnd?: string; // HH:mm
+    daysOfWeek?: number[]; // 1=월, 2=화, ..., 7=일
+  }): Promise<{
+    groupId: number;
+    groupName: string;
+    memberCount: number;
+    searchPeriod: {
+      startDate: string;
+      endDate: string;
+      minDurationMinutes: number;
+    };
+    freeSlots: Array<{
+      startTime: string; // ISO 8601
+      endTime: string; // ISO 8601
+      durationMinutes: number;
+      dayOfWeek: string;
+    }>;
+    totalFreeSlotsFound: number;
+  }> {
+    try {
+      const response = await apiClient.post('/v1/schedules/find-free-slots', request);
+      return response.data;
+    } catch (error: any) {
+      console.error('[groupsApi.findFreeSlots] Error finding free slots:', error);
+      const message = error.response?.data?.message || error.response?.data?.error || '공강 시간 찾기에 실패했습니다.';
+      throw new Error(message);
+    }
   },
 };

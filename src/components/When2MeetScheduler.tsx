@@ -21,6 +21,7 @@ interface Props {
   groupName: string;
   groupMembers: Array<{ id: string; name: string }>;
   memberSchedules: Array<{ userId: string; userName: string; schedules: any[] }>;
+  currentUserId?: string; // Current user's cognitoSub
   onTimeSelected?: (data: {
     selectedMembers: string[];
     date: string;
@@ -34,6 +35,7 @@ export default function When2MeetScheduler({
   groupName,
   groupMembers,
   memberSchedules,
+  currentUserId,
   onTimeSelected,
   onBack
 }: Props) {
@@ -97,17 +99,32 @@ export default function When2MeetScheduler({
   // 일정 조율 시작
   const startScheduling = () => {
     if (selectedMembers.length > 0) {
+      console.log('[When2Meet] Starting scheduling with members:', selectedMembers);
+      console.log('[When2Meet] Member schedules data:', memberSchedules);
+      console.log('[When2Meet] Date range:', dateRange);
+
       // 선택된 멤버들의 실제 일정을 participants로 변환
       const selectedParticipants: Participant[] = selectedMembers.map((memberId) => {
         const memberData = memberSchedules.find(m => m.userId === memberId);
         const memberInfo = groupMembers.find(m => m.id === memberId);
 
+        console.log(`[When2Meet] Processing member ${memberId}:`, memberData);
+
         // 해당 멤버의 일정을 슬롯으로 변환
         const slots = new Set<string>();
         if (memberData && memberData.schedules) {
+          console.log(`[When2Meet] Member ${memberId} has ${memberData.schedules.length} schedules`);
+
           memberData.schedules.forEach((schedule: any) => {
             const scheduleStart = new Date(schedule.start);
             const scheduleEnd = new Date(schedule.end);
+
+            console.log(`[When2Meet] Processing schedule: ${schedule.title}`, {
+              start: scheduleStart,
+              end: scheduleEnd,
+              startStr: scheduleStart.toDateString(),
+              endStr: scheduleEnd.toDateString(),
+            });
 
             // 날짜 범위 내의 일정만 처리
             dateRange.forEach(date => {
@@ -118,16 +135,22 @@ export default function When2MeetScheduler({
                 const startHour = scheduleStart.getHours();
                 const endHour = scheduleEnd.getHours();
 
+                console.log(`[When2Meet] Match found! Date: ${dateStr}, Hours: ${startHour}-${endHour}`);
+
                 // 해당 시간대를 슬롯에 추가
                 for (let hour = startHour; hour < endHour; hour++) {
                   if (hours.includes(hour)) {
-                    slots.add(`${dateStr}-${hour}`);
+                    const slotKey = `${dateStr}-${hour}`;
+                    slots.add(slotKey);
+                    console.log(`[When2Meet] Added slot: ${slotKey}`);
                   }
                 }
               }
             });
           });
         }
+
+        console.log(`[When2Meet] Member ${memberId} total slots:`, Array.from(slots));
 
         return {
           id: memberId,
@@ -137,6 +160,7 @@ export default function When2MeetScheduler({
         };
       });
 
+      console.log('[When2Meet] Final participants:', selectedParticipants);
       setParticipants(selectedParticipants);
       setStep('scheduling');
     }
@@ -150,22 +174,21 @@ export default function When2MeetScheduler({
     return participants.filter((p) => p.slots.has(key)).length;
   };
 
-  // 특정 시간대가 다른 사람의 일정인지 확인
-  const hasOthersSchedule = (day: string, hour: number) => {
+  // 특정 시간대가 누군가의 일정인지 확인 (선택 불가 여부)
+  const hasAnySchedule = (day: string, hour: number) => {
     return getParticipantCountForSlot(day, hour) > 0;
   };
 
   // 현재 사용자의 일정인지 확인
   const isMySchedule = (day: string, hour: number) => {
     const key = getSlotKey(day, hour);
-    // current-user-id를 가진 참가자가 현재 사용자
-    const currentUserParticipant = participants.find(p => p.id === 'current-user-id');
+    const currentUserParticipant = participants.find(p => p.id === currentUserId);
     return currentUserParticipant?.slots.has(key) || false;
   };
 
   // 현재 사용자의 일정 제목 가져오기
   const getMyScheduleTitle = (day: string, hour: number) => {
-    const currentUserParticipant = participants.find(p => p.id === 'current-user-id');
+    const currentUserParticipant = participants.find(p => p.id === currentUserId);
     if (!currentUserParticipant) return null;
 
     // day 문자열에서 날짜 정보 추출 (예: "11/20(수)" -> 11월 20일)
@@ -204,20 +227,20 @@ export default function When2MeetScheduler({
   };
 
   const handleMouseDown = (day: string, hour: number) => {
-    const hasOthers = hasOthersSchedule(day, hour);
+    const hasSchedule = hasAnySchedule(day, hour);
 
-    // 다른 사람 일정이 있으면 선택 불가
-    if (!hasOthers) {
+    // 누군가의 일정이 있으면 선택 불가 (내 일정이든 남의 일정이든)
+    if (!hasSchedule) {
       setIsDragging(true);
       toggleSlot(day, hour);
     }
   };
 
   const handleMouseEnter = (day: string, hour: number) => {
-    const hasOthers = hasOthersSchedule(day, hour);
+    const hasSchedule = hasAnySchedule(day, hour);
 
-    // 다른 사람 일정이 있으면 선택 불가
-    if (isDragging && !hasOthers) {
+    // 누군가의 일정이 있으면 선택 불가
+    if (isDragging && !hasSchedule) {
       toggleSlot(day, hour);
     }
   };
@@ -271,13 +294,16 @@ export default function When2MeetScheduler({
   const getSlotBackgroundColor = (day: string, hour: number) => {
     const key = getSlotKey(day, hour);
     const isSelected = selectedSlots.has(key);
-    const hasOthers = hasOthersSchedule(day, hour);
+    const hasSchedule = hasAnySchedule(day, hour);
 
     if (isSelected) {
+      // 선택된 시간 (파란색)
       return 'bg-blue-500 hover:bg-blue-600';
-    } else if (hasOthers) {
-      return 'bg-gray-400 hover:bg-gray-500';
+    } else if (hasSchedule) {
+      // 누군가의 일정이 있는 시간 (회색)
+      return 'bg-gray-400 cursor-not-allowed';
     } else {
+      // 빈 시간 (흰색)
       return 'bg-white hover:bg-slate-100';
     }
   };
@@ -286,16 +312,18 @@ export default function When2MeetScheduler({
   const getSlotContent = (day: string, hour: number) => {
     const isMine = isMySchedule(day, hour);
 
+    // 내 일정인 경우에만 제목 표시
     if (isMine) {
       const title = getMyScheduleTitle(day, hour);
       if (title) {
         return (
           <div className="text-white text-xs flex flex-col items-center justify-center h-full px-1">
-            <span className="truncate w-full text-center">{title}</span>
+            <span className="truncate w-full text-center font-medium">{title}</span>
           </div>
         );
       }
     }
+    // 남의 일정이거나 빈 시간인 경우 아무것도 표시하지 않음
     return null;
   };
 

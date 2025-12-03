@@ -82,7 +82,10 @@ export const schedulesApi = {
   /**
    * Create a new schedule
    */
-  async createSchedule(scheduleData: Omit<Schedule, 'id'>): Promise<Schedule> {
+  async createSchedule(
+    scheduleData: Omit<Schedule, 'id'>,
+    groupId?: number
+  ): Promise<Schedule> {
     try {
       // Helper function to format date as local time (not UTC)
       const formatLocalDateTime = (date: Date): string => {
@@ -104,7 +107,7 @@ export const schedulesApi = {
         endTime: formatLocalDateTime(scheduleData.end),
         isAllDay: false,
         categoryId: parseInt(scheduleData.calendarId),
-        groupId: null,
+        groupId: groupId || null, // Include groupId if provided
         recurrenceRule: null,
       };
 

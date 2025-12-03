@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Users, Calendar, Trash2 } from 'lucide-react';
+import { Plus, Users, Calendar, Trash2, Search } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { groupsApi, friendsApi } from '@/api';
+import { groupsApi, friendsApi, schedulesApi, calendarsApi } from '@/api';
 import type { Group, GroupSchedule, Friend, Schedule } from '@/types';
 import When2MeetScheduler from '@/components/When2MeetScheduler';
 
@@ -120,29 +120,31 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
       const startDateTime = new Date(`${newEvent.date}T${newEvent.startTime}`);
       const endDateTime = new Date(`${newEvent.date}T${newEvent.endTime}`);
 
-      const created = await groupsApi.createGroupSchedule(selectedGroup.id, {
-        title: newEvent.title,
-        description: newEvent.description,
-        location: newEvent.location,
-        start: startDateTime,
-        end: endDateTime,
-        memberIds: newEvent.members,
-      });
+      // Get user's first calendar for the schedule
+      const calendars = await calendarsApi.listCalendars();
+      const defaultCalendar = calendars.find(c => c.type === 'local') || calendars[0];
 
-      setGroupSchedules((prev) => [...prev, created]);
+      if (!defaultCalendar) {
+        toast.error('캘린더가 없습니다. 먼저 캘린더를 생성해주세요.');
+        return;
+      }
 
-      // Also add to global calendar schedules
-      const calendarSchedule: Schedule = {
-        id: `group-${created.id}`,
-        title: created.title,
-        description: created.description || '',
-        start: created.start,
-        end: created.end,
-        location: created.location,
-        isCompleted: false,
-        calendarId: 'local-calendar', // Add to local calendar
-      };
-      setSchedules((prev) => [...prev, calendarSchedule]);
+      // Create schedule with groupId - backend will automatically add to all group members' calendars
+      const created = await schedulesApi.createSchedule(
+        {
+          title: newEvent.title,
+          description: newEvent.description,
+          location: newEvent.location,
+          start: startDateTime,
+          end: endDateTime,
+          isCompleted: false,
+          calendarId: defaultCalendar.id,
+        },
+        parseInt(selectedGroup.id) // Pass groupId to create group schedule
+      );
+
+      // Add to local state
+      setSchedules((prev) => [...prev, created]);
 
       setNewEvent({
         title: '',
@@ -154,8 +156,9 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
         members: [],
       });
       setIsEventDialogOpen(false);
-      toast.success('그룹 일정이 생성되었습니다');
+      toast.success('그룹 일정이 생성되었습니다. 모든 멤버의 캘린더에 추가됩니다.');
     } catch (error: any) {
+      console.error('Failed to create group event:', error);
       toast.error(error.message || '일정 생성 실패');
     }
   };
@@ -199,36 +202,116 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
   const handleOpenCoordinationDialog = async (group: Group) => {
     // Fetch fresh group details to ensure we have member information
     try {
+      setCoordination({ ...coordination, isLoading: true });
+
       const freshGroup = await groupsApi.getGroup(group.id);
       setSelectedGroup(freshGroup);
+
+      // Get current user ID from localStorage
+      const userData = localStorage.getItem('user_data');
+      const parsedUserData = userData ? JSON.parse(userData) : null;
+      console.log('[GroupsPage] Parsed user data:', parsedUserData);
+
+      const currentUserId = parsedUserData?.cognitoSub;
+
+      console.log('[GroupsPage] Current user ID:', currentUserId);
+      console.log('[GroupsPage] Group members:', freshGroup.members);
+      console.log('[GroupsPage] Available schedules:', schedules.length);
+
+      // Fetch schedules for all group members
+      const memberSchedulePromises = freshGroup.members?.map(async (member) => {
+        try {
+          console.log(`[GroupsPage] Checking member ${member.id} (${member.name}) vs currentUserId ${currentUserId}`);
+
+          // Fetch schedules for this member
+          // Note: We need to fetch schedules for each member - this might require backend support
+          // For now, we'll only fetch current user's schedules
+          if (member.id === currentUserId) {
+            console.log(`[GroupsPage] ✓ Match! Loading schedules for ${member.name}:`, schedules.length);
+            return {
+              userId: member.id,
+              userName: member.name,
+              schedules: schedules, // Use already loaded schedules
+            };
+          } else {
+            console.log(`[GroupsPage] ✗ No match for ${member.name}`);
+            // For other members, return empty schedules (backend needs to support this)
+            return {
+              userId: member.id,
+              userName: member.name,
+              schedules: [], // TODO: Backend should provide member schedules API
+            };
+          }
+        } catch (error) {
+          console.error(`Failed to fetch schedules for member ${member.id}:`, error);
+          return {
+            userId: member.id,
+            userName: member.name,
+            schedules: [],
+          };
+        }
+      }) || [];
+
+      const memberSchedulesData = await Promise.all(memberSchedulePromises);
+
+      setCoordination({
+        memberSchedules: memberSchedulesData,
+        isLoading: false,
+      });
       setIsCoordinationDialogOpen(true);
+    } catch (error: any) {
+      console.error('Failed to load group details:', error);
+      toast.error('그룹 정보를 불러오는데 실패했습니다.');
+      setCoordination({ memberSchedules: [], isLoading: false });
+    }
+  };
 
-      // 그룹 멤버들의 일정을 미리 로드
-      setCoordination({ memberSchedules: [], isLoading: true });
+  const [freeSlots, setFreeSlots] = useState<Array<{
+    startTime: string;
+    endTime: string;
+    durationMinutes: number;
+    dayOfWeek: string;
+  }>>([]);
+  const [isSearchingFreeSlots, setIsSearchingFreeSlots] = useState(false);
 
-      // 현재 날짜 기준 한 달 기간으로 일정 조회
-      const startDate = new Date();
-      startDate.setDate(1); // 이번 달 1일
-      startDate.setHours(0, 0, 0, 0);
+  const handleFindFreeSlots = async () => {
+    if (!selectedGroup) return;
 
-      const endDate = new Date(startDate);
-      endDate.setMonth(endDate.getMonth() + 1);
-      endDate.setDate(0); // 이번 달 마지막 날
-      endDate.setHours(23, 59, 59, 999);
+    try {
+      setIsSearchingFreeSlots(true);
 
-      const memberSchedules = await groupsApi.getMemberSchedulesForCoordination({
-        memberIds: freshGroup.memberIds,
-        period: {
-          start: startDate,
-          end: endDate,
-        },
+      // 오늘부터 14일(2주)간의 공강 시간 찾기
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const twoWeeksLater = new Date(today);
+      twoWeeksLater.setDate(today.getDate() + 14);
+
+      console.log('[GroupsPage] Searching free slots from', today.toISOString().split('T')[0], 'to', twoWeeksLater.toISOString().split('T')[0]);
+
+      const result = await groupsApi.findFreeSlots({
+        groupId: parseInt(selectedGroup.id),
+        startDate: today.toISOString().split('T')[0],
+        endDate: twoWeeksLater.toISOString().split('T')[0],
+        minDurationMinutes: 60, // 최소 1시간
+        workingHoursStart: '09:00',
+        workingHoursEnd: '22:00',
+        daysOfWeek: [1, 2, 3, 4, 5, 6, 7], // 월~일 (모든 요일)
       });
 
-      setCoordination({ memberSchedules, isLoading: false });
+      console.log('[GroupsPage] Free slots result:', result);
+      setFreeSlots(result.freeSlots);
+
+      if (result.totalFreeSlotsFound === 0) {
+        toast.warning('2주 이내에 공강 시간이 없습니다. 다른 조건으로 검색해보세요.');
+      } else {
+        toast.success(`${result.totalFreeSlotsFound}개의 공강 시간을 찾았습니다! (모든 멤버가 비어있는 시간)`);
+      }
     } catch (error: any) {
-      console.error('Failed to load member schedules:', error);
-      setCoordination({ memberSchedules: [], isLoading: false });
-      toast.error('멤버 일정 로드 실패');
+      console.error('Failed to find free slots:', error);
+      toast.error(error.message || '공강 시간 찾기 실패');
+    } finally {
+      setIsSearchingFreeSlots(false);
     }
   };
 
@@ -385,7 +468,20 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
               />
             </div>
             <div>
-              <Label>참여 멤버 선택 ({newEvent.members.length}/{selectedGroup?.members?.length || 0})</Label>
+              <div className="flex items-center justify-between mb-2">
+                <Label>참여 멤버 선택 ({newEvent.members.length}/{selectedGroup?.members?.length || 0})</Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleFindFreeSlots}
+                  disabled={isSearchingFreeSlots}
+                  className="text-xs"
+                >
+                  <Search className="w-3 h-3 mr-1" />
+                  {isSearchingFreeSlots ? '검색 중...' : '비어있는 시간 찾기'}
+                </Button>
+              </div>
               <div className="grid grid-cols-2 gap-3 mt-2 max-h-40 overflow-y-auto">
                 {selectedGroup?.members?.map((member) => {
                   return (
@@ -415,6 +511,51 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
                 })}
               </div>
             </div>
+
+            {/* Free Slots Results */}
+            {freeSlots.length > 0 && (
+              <div className="border rounded-lg p-3 bg-green-50">
+                <div className="mb-2">
+                  <Label className="text-green-800 font-semibold block">
+                    공강 시간 ({freeSlots.length}개)
+                  </Label>
+                  <p className="text-xs text-green-700 mt-1">
+                    모든 그룹 멤버가 비어있는 시간입니다. 클릭하여 선택하세요.
+                  </p>
+                </div>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {freeSlots.map((slot, index) => {
+                    const start = new Date(slot.startTime);
+                    const end = new Date(slot.endTime);
+                    return (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => {
+                          setNewEvent({
+                            ...newEvent,
+                            date: start.toISOString().split('T')[0],
+                            startTime: start.toTimeString().slice(0, 5),
+                            endTime: end.toTimeString().slice(0, 5),
+                          });
+                        }}
+                        className="w-full text-left p-2 bg-white border border-green-200 rounded hover:bg-green-100 transition-colors"
+                      >
+                        <div className="text-sm font-medium text-green-900">
+                          {slot.dayOfWeek} - {start.toLocaleDateString('ko-KR')}
+                        </div>
+                        <div className="text-xs text-green-700">
+                          {start.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })} ~{' '}
+                          {end.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}
+                          ({slot.durationMinutes}분)
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             <Button onClick={handleCreateEvent} className="w-full">
               생성
             </Button>
@@ -444,6 +585,10 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
                   })) || []
                 }
                 memberSchedules={coordination.memberSchedules}
+                currentUserId={(() => {
+                  const userData = localStorage.getItem('user_data');
+                  return userData ? JSON.parse(userData).cognitoSub : null;
+                })()}
                 onTimeSelected={handleTimeSelected}
                 onBack={() => setIsCoordinationDialogOpen(false)}
               />
