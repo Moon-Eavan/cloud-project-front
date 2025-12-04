@@ -421,7 +421,7 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
                   ))}
                 </div>
               </div>
-              <Button onClick={handleCreateGroup} className="w-full">
+              <Button onClick={handleCreateGroup} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                 생성
               </Button>
             </div>
@@ -576,7 +576,7 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
               </div>
             )}
 
-            <Button onClick={handleCreateEvent} className="w-full">
+            <Button onClick={handleCreateEvent} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
               생성
             </Button>
           </div>
