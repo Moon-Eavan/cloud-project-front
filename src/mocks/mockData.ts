@@ -158,25 +158,4 @@ export const mockGroups: Group[] = [
   },
 ];
 
-export const mockNotifications: Notification[] = [
-  {
-    id: 'notif-1',
-    userId: 'user-1',
-    type: 'friend_request',
-    title: '친구 요청',
-    message: '박민수님이 친구 요청을 보냈습니다.',
-    read: false,
-    createdAt: new Date(2025, 10, 18),
-    relatedId: 'friend-3',
-  },
-  {
-    id: 'notif-2',
-    userId: 'user-1',
-    type: 'group_schedule_added',
-    title: '그룹 일정 등록',
-    message: '소프트웨어 공학 팀프로젝트 그룹에 새로운 일정이 등록되었습니다.',
-    read: false,
-    createdAt: new Date(2025, 10, 17),
-    relatedId: 'group-1',
-  },
-];
+export const mockNotifications: Notification[] = [];

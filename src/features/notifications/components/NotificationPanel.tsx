@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Bell, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -6,18 +6,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { notificationsApi } from '@/api';
+import { notificationsApi, friendsApi } from '@/api';
 import type { Notification } from '@/types';
 
 export default function NotificationPanel() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
+  const processedRequestIdsRef = useRef<Set<string>>(new Set());
 
-  useEffect(() => {
-    loadNotifications();
-  }, []);
-
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     try {
       const data = await notificationsApi.listNotifications();
       setNotifications(data);
@@ -26,7 +23,57 @@ export default function NotificationPanel() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const checkForNewFriendRequests = useCallback(async () => {
+    try {
+      const pendingRequests = await friendsApi.getPendingRequests();
+
+      if (pendingRequests.length === 0) {
+        return;
+      }
+
+      let hasNewRequests = false;
+
+      // Check for new requests that we haven't processed yet
+      for (const request of pendingRequests) {
+        if (!processedRequestIdsRef.current.has(request.id)) {
+          // Create notification for this friend request
+          await notificationsApi.createNotification(
+            'friend_request',
+            '친구 요청',
+            `${request.fromUserName}님이 친구 요청을 보냈습니다.`,
+            request.id,
+            '/friends'
+          );
+
+          processedRequestIdsRef.current.add(request.id);
+          hasNewRequests = true;
+        }
+      }
+
+      // Reload notifications if there were new requests
+      if (hasNewRequests) {
+        await loadNotifications();
+      }
+    } catch (error) {
+      console.error('Failed to check for friend requests:', error);
+    }
+  }, [loadNotifications]);
+
+  useEffect(() => {
+    loadNotifications();
+
+    // Disabled polling - causes infinite refresh
+    // checkForNewFriendRequests(); // Initial check
+
+    // Poll for new friend requests every 10 seconds
+    // const interval = setInterval(() => {
+    //   checkForNewFriendRequests();
+    // }, 10000);
+
+    // return () => clearInterval(interval);
+  }, [loadNotifications]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 

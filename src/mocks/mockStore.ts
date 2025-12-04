@@ -45,6 +45,19 @@ export const generateId = () => {
   return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
+// Sync currentUser from localStorage
+export const syncCurrentUser = () => {
+  const userData = localStorage.getItem('user_data');
+  if (userData) {
+    try {
+      const user = JSON.parse(userData);
+      store.currentUser = user;
+    } catch (error) {
+      console.error('Failed to sync current user from localStorage:', error);
+    }
+  }
+};
+
 // Reset function for development/testing
 export const resetStore = () => {
   store.users = [];

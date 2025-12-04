@@ -3,7 +3,7 @@
 // TODO: Replace with real axios-based HTTP calls to backend
 
 import type { Notification, NotificationType } from '@/types';
-import { store, generateId } from '@/mocks/mockStore';
+import { store, generateId, syncCurrentUser } from '@/mocks/mockStore';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -14,6 +14,9 @@ export const notificationsApi = {
    */
   async listNotifications(): Promise<Notification[]> {
     await delay(300);
+
+    // Sync current user from localStorage
+    syncCurrentUser();
 
     if (!store.currentUser) {
       throw new Error('로그인이 필요합니다.');
@@ -83,7 +86,6 @@ export const notificationsApi = {
    * TODO: This will be handled by backend when events occur
    */
   async createNotification(
-    userId: string,
     type: NotificationType,
     title: string,
     message: string,
@@ -92,9 +94,16 @@ export const notificationsApi = {
   ): Promise<Notification> {
     await delay(200);
 
+    // Sync current user from localStorage
+    syncCurrentUser();
+
+    if (!store.currentUser) {
+      throw new Error('로그인이 필요합니다.');
+    }
+
     const newNotification: Notification = {
       id: generateId(),
-      userId,
+      userId: store.currentUser.id,
       type,
       title,
       message,

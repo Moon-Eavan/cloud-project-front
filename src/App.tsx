@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from './components/ui/sheet';
 import { Checkbox } from './components/ui/checkbox';
 import { ImageWithFallback } from './components/common/ImageWithFallback';
 import { MiniCalendar } from './components/common/MiniCalendar';
-import NotificationPanel from './components/common/NotificationPanel';
+import NotificationPanel from './features/notifications/components/NotificationPanel';
 import { toast, Toaster } from 'sonner';
 
 // Pages
