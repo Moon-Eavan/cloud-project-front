@@ -2,6 +2,11 @@
 
 대학생을 위한 현대적인 일정 및 할 일 관리 애플리케이션입니다. React, TypeScript, Vite로 구축되었으며 E-Campus(Canvas LMS), Google Calendar와의 통합을 지원합니다.
 
+## 요구사항
+
+- Node.js: >= 20.10.0 (권장: 20.x LTS)
+- npm: >= 10.0.0
+
 ## Quick Start
 
 ```bash
