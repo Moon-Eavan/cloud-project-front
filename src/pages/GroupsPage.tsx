@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { groupsApi, friendsApi, schedulesApi, calendarsApi } from '@/api';
 import type { Group, GroupSchedule, Friend, Schedule } from '@/types';
@@ -663,16 +664,35 @@ export default function GroupsPage({ schedules, setSchedules }: GroupsPageProps)
                       <p className="text-sm text-slate-500 mb-2">일정 ({schedules.length})</p>
                       {schedules.length > 0 ? (
                         <div className="space-y-2">
-                          {schedules.slice(0, 2).map((schedule) => (
-                            <div key={schedule.id} className="text-sm p-2 bg-slate-50 rounded flex items-center gap-2">
-                              <Calendar className="w-3 h-3" />
-                              <span className="truncate">{schedule.title}</span>
-                              <Badge variant="outline" className="ml-auto">
-                                <Users className="w-3 h-3 mr-1" />
-                                {schedule.memberIds.length}명
-                              </Badge>
-                            </div>
-                          ))}
+                          {schedules.slice(0, 2).map((schedule) => {
+                            // Get member names for this schedule
+                            const scheduleMembers = group.members?.filter(m =>
+                              schedule.memberIds.includes(m.id)
+                            ) || [];
+                            const memberNames = scheduleMembers.map(m => m.name).join(', ');
+
+                            return (
+                              <div key={schedule.id} className="text-sm p-2 bg-slate-50 rounded flex items-center gap-2">
+                                <Calendar className="w-3 h-3" />
+                                <span className="truncate">{schedule.title}</span>
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <div className="ml-auto">
+                                        <Badge variant="outline">
+                                          <Users className="w-3 h-3 mr-1" />
+                                          {schedule.memberIds.length}명
+                                        </Badge>
+                                      </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent side="top" className="text-xs max-w-xs">
+                                      <p>{memberNames || '멤버 정보 없음'}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              </div>
+                            );
+                          })}
                         </div>
                       ) : (
                         <p className="text-sm text-slate-400">등록된 일정이 없습니다</p>
