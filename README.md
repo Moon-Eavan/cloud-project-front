@@ -1,92 +1,113 @@
-# Calendar & Task Management Application
+# UniSync - 통합 일정 관리 플랫폼
 
-A modern, full-featured calendar and task management application built with React, TypeScript, and Vite. This application follows the specifications outlined in [spec.md](spec.md).
+대학생을 위한 현대적인 일정 및 할 일 관리 애플리케이션입니다. React, TypeScript, Vite로 구축되었으며 E-Campus(Canvas LMS), Google Calendar와의 통합을 지원합니다.
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
-# Install dependencies
+# 의존성 설치
 npm install --legacy-peer-deps
 
-# Start development server
+# 개발 서버 시작
 npm run dev
 ```
 
-The application will be available at **http://localhost:3000**
+애플리케이션이 **http://localhost:3000**에서 실행됩니다.
 
-## 📋 Features
+### 환경 변수 설정
 
-### Authentication
-- ✅ Email/password based signup and login
-- ✅ Form validation with real-time feedback
-- ✅ Session management
-- ✅ Protected routes
+`.env` 파일을 생성하고 다음 내용을 추가하세요:
 
-### Calendar Management
-- ✅ **Three Calendar Types**:
-  - **Google Calendar**: OAuth-integrated (UI ready for backend)
-  - **Calendar** (local): Service-managed calendar
-  - **E-Campus**: Read-only, token-based sync (UI ready for backend)
-- ✅ Sidebar with visibility toggles for each calendar
-- ✅ Month view with color-coded schedules
-- ✅ Create, edit, delete schedules (except E-Campus)
-- ✅ Convert schedules to tasks
-- ✅ Completed schedules show with strikethrough
+```env
+# API Gateway URL
+VITE_API_BASE_URL=http://localhost:8080/api
 
-### Task Management
-- ✅ **Kanban Board**: Three columns (To Do, In Progress, Done)
-- ✅ **Gantt Chart**: Timeline view with parent/subtask hierarchy
-- ✅ **Sync Rules** (per spec.md section 3):
-  - Parent tasks without subtasks appear in Kanban
-  - When subtasks are created, parent is removed from Kanban and all subtasks appear
-  - Kanban can only create parent tasks
-  - Status changes sync between Kanban and Gantt
-- ✅ Done tasks show with strikethrough in Gantt
+# Canvas LMS URL (optional)
+VITE_CANVAS_URL=https://canvas.instructure.com
+```
 
-### Friends & Groups
-- ✅ Add friends by ID/email
-- ✅ Friend request system
-- ✅ Create groups (only with existing friends)
-- ✅ Group schedule coordination (When2Meet style)
-- ✅ Privacy-preserved schedule viewing (others' schedules show as gray blocks)
+## 주요 기능
 
-### Notifications
-- ✅ Notification panel at bottom-left
-- ✅ Friend request notifications
-- ✅ Group schedule notifications
-- ✅ Mark as read functionality
-- ✅ Unread count badge
+### 인증
+- 이메일/비밀번호 기반 회원가입 및 로그인
+- JWT 토큰 기반 인증
+- 실시간 폼 유효성 검사
+- 자동 토큰 갱신
+- 보호된 라우트
 
-### My Page
-- ✅ Profile management
-- ✅ Google Calendar integration (UI ready)
-- ✅ E-Campus token integration (UI ready)
-- ✅ Password change
-- ✅ Account settings
+### 캘린더 관리
+- **3가지 캘린더 유형**:
+  - **로컬 캘린더**: 서비스 자체 관리 캘린더
+  - **Google Calendar**: OAuth 통합 (백엔드 연동 준비 완료)
+  - **E-Campus**: 읽기 전용, 토큰 기반 동기화 (백엔드 연동 완료)
+- 사이드바에서 캘린더별 가시성 토글
+- 색상으로 구분된 월간 뷰
+- 일정 생성, 수정, 삭제 (E-Campus 제외)
+- 일정을 할 일로 변환
+- 완료된 일정 취소선 표시
 
-## 🏗️ Project Structure
+### 할 일 관리
+- **칸반 보드**: 3개 열 (할 일, 진행 중, 완료)
+- **간트 차트**: 타임라인 뷰, 부모/하위 작업 계층 구조
+- **동기화 규칙**:
+  - 하위 작업이 없는 부모 작업만 칸반에 표시
+  - 하위 작업 생성 시 부모는 칸반에서 제거되고 모든 하위 작업이 표시됨
+  - 칸반에서는 부모 작업만 생성 가능
+  - 상태 변경이 칸반과 간트 간 동기화됨
+- 완료된 작업 간트 차트에서 취소선 표시
+
+### 친구 & 그룹
+- 이메일/ID로 친구 추가
+- 친구 요청 시스템 (수락/거절)
+- 그룹 생성 (기존 친구만)
+- 그룹 일정 조율 (When2Meet 스타일)
+- 프라이버시 보호 일정 보기 (타인 일정은 회색 블록으로 표시)
+- 자동 공강 시간 찾기
+- 그룹 일정 생성 및 관리
+- 그룹 멤버 툴팁 표시
+
+### 알림
+- 상단 우측 알림 패널
+- 친구 요청 알림 (백엔드 연동 준비 완료)
+- 그룹 일정 알림
+- 읽음/읽지 않음 상태 관리
+- 읽지 않은 알림 개수 배지
+
+### 마이페이지
+- 프로필 관리
+- Google Calendar 연동 (UI 준비 완료)
+- E-Campus 토큰 연동 (백엔드 연동 완료)
+- 비밀번호 변경
+- 계정 설정
+
+## 프로젝트 구조
 
 ```
-Calendar/
+UniSync-front/
 ├── src/
-│   ├── api/                    # API layer (backend integrated)
-│   │   ├── client.ts           # Axios client with JWT auth
-│   │   ├── authApi.ts          # ✅ Backend integrated
-│   │   ├── calendarsApi.ts     # ✅ Backend integrated
-│   │   ├── schedulesApi.ts     # ✅ Backend integrated
-│   │   ├── tasksApi.ts         # ✅ Backend integrated
-│   │   ├── friendsApi.ts
-│   │   ├── groupsApi.ts
-│   │   └── notificationsApi.ts
+│   ├── api/                      # API 레이어 (백엔드 통합)
+│   │   ├── client.ts             # JWT 인증이 포함된 Axios 클라이언트
+│   │   ├── authApi.ts            # 백엔드 연동 완료
+│   │   ├── calendarsApi.ts       # 백엔드 연동 완료
+│   │   ├── schedulesApi.ts       # 백엔드 연동 완료
+│   │   ├── tasksApi.ts           # 백엔드 연동 완료
+│   │   ├── friendsApi.ts         # 백엔드 연동 완료
+│   │   ├── groupsApi.ts          # 백엔드 연동 완료
+│   │   ├── enrollmentsApi.ts     # 백엔드 연동 완료 (E-Campus)
+│   │   ├── ecampusApi.ts         # 백엔드 연동 완료
+│   │   └── notificationsApi.ts   # Mock (백엔드 API 대기 중)
 │   │
 │   ├── components/
-│   │   ├── ui/                 # shadcn/ui components
-│   │   ├── layout/             # Layout components
-│   │   │   ├── AppLayout.tsx
+│   │   ├── ui/                   # shadcn/ui 컴포넌트
+│   │   ├── layout/               # 레이아웃 컴포넌트
 │   │   │   └── Sidebar.tsx
-│   │   └── common/             # Shared components
+│   │   ├── common/               # 공통 컴포넌트
+│   │   │   ├── MiniCalendar.tsx
+│   │   │   └── ImageWithFallback.tsx
+│   │   ├── LoginDialog.tsx
+│   │   └── When2MeetScheduler.tsx # 그룹 일정 조율 컴포넌트
 │   │
-│   ├── features/               # Feature-based modules
+│   ├── features/                 # 기능별 모듈
 │   │   ├── auth/
 │   │   ├── calendar/
 │   │   │   └── components/
@@ -95,204 +116,183 @@ Calendar/
 │   │   │   └── components/
 │   │   │       ├── KanbanBoard.tsx
 │   │   │       └── GanttChart.tsx
-│   │   ├── friends/
-│   │   ├── groups/
 │   │   └── notifications/
 │   │       └── components/
 │   │           └── NotificationPanel.tsx
 │   │
-│   ├── pages/                  # Top-level pages
-│   │   ├── LoginPage.tsx
+│   ├── pages/                    # 최상위 페이지
 │   │   ├── DashboardPage.tsx
 │   │   ├── MyPage.tsx
 │   │   ├── FriendsPage.tsx
 │   │   └── GroupsPage.tsx
 │   │
-│   ├── mocks/                  # Mock data & in-memory storage
+│   ├── mocks/                    # Mock 데이터 (notifications만 사용)
 │   │   ├── mockStore.ts
 │   │   └── mockData.ts
 │   │
-│   ├── lib/                    # Utilities
+│   ├── lib/                      # 유틸리티
 │   │   ├── utils.ts
 │   │   ├── constants.ts
-│   │   └── syncRules.ts        # Task-Kanban-Gantt sync logic
+│   │   └── syncRules.ts          # Task-Kanban-Gantt 동기화 로직
 │   │
-│   ├── types/                  # TypeScript type definitions
+│   ├── types/                    # TypeScript 타입 정의
 │   │   └── index.ts
 │   │
-│   ├── App.tsx                 # Main app with routing
-│   ├── main.tsx                # Entry point
-│   └── index.css               # Global styles
+│   ├── App.tsx                   # 라우팅이 포함된 메인 앱
+│   ├── main.tsx                  # 진입점
+│   └── index.css                 # 글로벌 스타일
 │
-├── spec.md                     # Application specification
+├── spec.md                       # 애플리케이션 명세
 ├── package.json
 ├── vite.config.ts
 └── tailwind.config.js
 ```
 
-## 🔧 Technology Stack
+## 기술 스택
 
-- **Framework**: React 18.3 + TypeScript
-- **Build Tool**: Vite 6.3
-- **Routing**: React Router DOM v7
-- **UI Components**: shadcn/ui + Radix UI
-- **Styling**: Tailwind CSS
-- **Icons**: Lucide React
-- **Notifications**: Sonner
-- **Date Utilities**: date-fns
-- **HTTP Client**: axios (ready for backend integration)
+- **프레임워크**: React 18.3 + TypeScript
+- **빌드 도구**: Vite 6.3
+- **라우팅**: React Router DOM v7
+- **UI 컴포넌트**: shadcn/ui + Radix UI
+- **스타일링**: Tailwind CSS
+- **아이콘**: Lucide React
+- **알림**: Sonner
+- **날짜 유틸리티**: date-fns
+- **HTTP 클라이언트**: axios (백엔드 통합)
 
-## 🎯 Current Implementation Status
+## 구현 상태
 
-### ✅ Completed - Core Features
-- Project setup and configuration
-- Complete folder structure
-- TypeScript type definitions (matching spec.md)
-- All core features implemented and working:
-  - Authentication (login/signup)
-  - Calendar with 3 calendar types
-  - Schedule management
-  - Task management (Kanban + Gantt)
-  - Friends management
-  - Groups management
-  - Notifications
-  - My Page
+### 완료 - 백엔드 통합
 
-### ✅ Backend Integration Completed
+**통합 완료된 API:**
 
-**Integrated APIs:**
-1. **Authentication API** (`authApi.ts`)
-   - JWT-based login/signup
-   - Token management in localStorage
-   - Auto token refresh on page load
+1. **인증 API** (`authApi.ts`)
+   - JWT 기반 로그인/회원가입
+   - localStorage에 토큰 관리
+   - 페이지 로드 시 자동 토큰 갱신
 
-2. **Categories API** (`calendarsApi.ts`)
-   - Backend: `/api/v1/categories`
-   - Create/read calendars
-   - Auto-create default calendar on first login
-   - Maps to frontend Calendar type
+2. **카테고리 API** (`calendarsApi.ts`)
+   - 백엔드: `/api/v1/categories`
+   - 캘린더 생성/조회
+   - 첫 로그인 시 기본 캘린더 자동 생성
+   - 프론트엔드 Calendar 타입으로 매핑
 
-3. **Schedules API** (`schedulesApi.ts`)
-   - Backend: `/api/v1/schedules`
-   - Full CRUD operations
-   - Status updates
-   - Timezone handling (ISO 8601)
+3. **일정 API** (`schedulesApi.ts`)
+   - 백엔드: `/api/v1/schedules`
+   - 전체 CRUD 작업
+   - 상태 업데이트
+   - 그룹 일정 생성 지원
+   - 타임존 처리 (ISO 8601)
 
-4. **Todos API** (`tasksApi.ts`)
-   - Backend: `/api/v1/todos`
-   - Parent/subtask hierarchy
-   - Status mapping (TODO/IN_PROGRESS/DONE ↔ todo/progress/done)
-   - Priority support (LOW/MEDIUM/HIGH/URGENT)
-   - Auto category assignment
+4. **할 일 API** (`tasksApi.ts`)
+   - 백엔드: `/api/v1/todos`
+   - 부모/하위 작업 계층 구조
+   - 상태 매핑 (TODO/IN_PROGRESS/DONE ↔ todo/progress/done)
+   - 우선순위 지원 (LOW/MEDIUM/HIGH/URGENT)
+   - 자동 카테고리 할당
 
-**Implementation Details:**
-```typescript
-// Example: tasksApi.ts
-async createTaskFromKanban(taskData: Omit<Task, 'id' | 'parentTaskId'>): Promise<Task> {
-  // Fetch user's categories
-  const categoriesResponse = await apiClient.get('/v1/categories');
-  const defaultCategoryId = categoriesResponse.data[0].categoryId;
+5. **친구 API** (`friendsApi.ts`)
+   - 백엔드: `/api/v1/friends`
+   - 친구 검색 (이메일/이름)
+   - 친구 요청 전송/수락/거절
+   - 친구 목록 조회
+   - 대기 중인 요청 조회
 
-  const requestBody = {
-    title: taskData.title,
-    description: taskData.description || null,
-    startDate: formatDateToString(taskData.startDate),
-    dueDate: formatDateToString(taskData.endDate),
-    status: 'TODO',
-    categoryId: defaultCategoryId,
-    scheduleId: null,
-    priority: 'MEDIUM',
-  };
+6. **그룹 API** (`groupsApi.ts`)
+   - 백엔드: `/api/v1/groups`
+   - 그룹 생성/조회/삭제
+   - 그룹 멤버 관리
+   - 공강 시간 찾기 기능
 
-  const response = await apiClient.post<TodoResponse>('/v1/todos', requestBody);
-  return mapTodoResponseToTask(response.data);
-}
-```
+7. **수강 과목 API** (`enrollmentsApi.ts`)
+   - 백엔드: `/api/v1/enrollments`
+   - E-Campus 과목 목록 조회
+   - 동기화 토글 관리
 
-### 🔄 Pending Backend Integration
+8. **E-Campus API** (`ecampusApi.ts`)
+   - 백엔드: `/api/v1/ecampus`
+   - Canvas LMS 토큰 등록/해제
+   - 과목 및 과제 동기화
 
-1. **Friends API** (UI ready)
-   - Friend requests
-   - Friend list management
+### Mock 구현 (백엔드 대기 중)
 
-2. **Groups API** (UI ready)
-   - Group creation
-   - Member management
-   - Group schedules
+1. **알림 API** (`notificationsApi.ts`)
+   - 현재 메모리 기반 mock 사용
+   - UI 준비 완료
+   - 백엔드 API 개발 대기 중
 
-3. **Notifications API** (UI ready)
-   - Real-time notifications
-   - Mark as read
+## 테스트
 
-4. **Google Calendar OAuth** (UI ready)
-   - OAuth flow
-   - Bidirectional sync
+### 백엔드 테스트
 
-5. **E-Campus Integration** (UI ready)
-   - Token validation
-   - Canvas assignments sync
+**사전 요구사항:**
+- `localhost:8080`에서 실행 중인 백엔드 서비스 (API Gateway)
+- Docker 서비스 실행 중 (MySQL, LocalStack)
 
-## 🧪 Testing
+**테스트 플로우:**
 
-### Backend Testing
+1. **회원가입 & 로그인** (실제 백엔드)
+   - 이메일/비밀번호로 계정 생성
+   - JWT 토큰이 localStorage에 저장됨
+   - 대시보드로 자동 리디렉션
 
-**Prerequisites:**
-- Backend services running on `localhost:8080` (API Gateway)
-- Docker services (MySQL, LocalStack) running
+2. **캘린더 관리** (실제 백엔드)
+   - 첫 로그인 시 기본 캘린더 자동 생성
+   - 일정 생성/수정/삭제
+   - 페이지 새로고침 후에도 일정 유지
+   - 캘린더 가시성 토글
 
-**Test Flows:**
+3. **할 일 관리** (실제 백엔드)
+   - 칸반 보드에서 작업 생성
+   - 작업이 백엔드와 동기화되고 유지됨
+   - 작업을 열 간 이동 (todo/progress/done)
+   - 간트 차트에서 작업 보기
+   - 간트에서 하위 작업 생성
+   - 칸반과 간트 간 상태 변경 동기화
 
-1. **Signup & Login** (Real Backend)
-   - Create account with email/password
-   - JWT token stored in localStorage
-   - Auto-redirect to dashboard
+4. **친구 & 그룹** (실제 백엔드)
+   - 이메일로 친구 검색 및 요청
+   - 친구 요청 수락/거절
+   - 친구로 그룹 생성
+   - 그룹 일정 생성
+   - When2Meet 스타일 일정 조율
 
-2. **Calendar Management** (Real Backend)
-   - First login auto-creates default calendar
-   - Create/edit/delete schedules
-   - Schedules persist across page refreshes
-   - Toggle calendar visibility
+5. **E-Campus 연동** (실제 백엔드)
+   - Canvas LMS 토큰 등록
+   - 과목 목록 불러오기
+   - 과목별 동기화 활성화/비활성화
+   - 과제 자동 동기화
 
-3. **Task Management** (Real Backend)
-   - Create tasks in Kanban board
-   - Tasks persist and sync with backend
-   - Move tasks between columns (todo/progress/done)
-   - View tasks in Gantt chart
-   - Create subtasks in Gantt
-   - Status changes sync between Kanban and Gantt
+6. **데이터 영속성** (작동 중)
+   - 로그인 시 백엔드에서 모든 데이터 가져오기
+   - 생성/수정/삭제 작업이 백엔드와 동기화됨
+   - 페이지 새로고침 후에도 모든 데이터 유지
 
-4. **Data Persistence** (✅ Working)
-   - All data fetched from backend on login
-   - Create/update/delete operations sync with backend
-   - Page refresh maintains all data
+### 알려진 제한사항
 
-### Known Limitations
+- **알림**: UI 준비 완료, 백엔드 통합 대기 중
+- **Google Calendar**: UI 준비 완료, OAuth 플로우 대기 중
 
-- **Friends/Groups**: UI ready, backend integration pending
-- **Notifications**: UI ready, backend integration pending
-- **Google Calendar**: UI ready, OAuth flow pending
-- **E-Campus Sync**: UI ready, Canvas integration pending
+## 주요 구현 세부사항
 
-## 📚 Key Implementation Details
+### Task-Kanban-Gantt 동기화 규칙
 
-### Task-Kanban-Gantt Sync Rules
-
-The application implements the sync rules from spec.md section 3:
+spec.md 섹션 3의 동기화 규칙 구현:
 
 ```typescript
-// From lib/syncRules.ts
+// lib/syncRules.ts에서
 export function getKanbanTasks(allTasks: Task[]): Task[] {
   return allTasks.filter((task) => {
-    if (task.parentTaskId) return true; // Show all subtasks
+    if (task.parentTaskId) return true; // 모든 하위 작업 표시
     const hasSubtasks = allTasks.some((t) => t.parentTaskId === task.id);
-    return !hasSubtasks; // Show parent only if no subtasks
+    return !hasSubtasks; // 하위 작업이 없는 경우에만 부모 표시
   });
 }
 ```
 
-### Calendar Visibility
+### 캘린더 가시성
 
-Calendars can be toggled on/off in the sidebar. Only visible calendars' schedules are rendered:
+사이드바에서 캘린더를 켜고 끌 수 있습니다. 보이는 캘린더의 일정만 렌더링됩니다:
 
 ```typescript
 const filteredSchedules = schedules.filter(schedule => {
@@ -301,84 +301,106 @@ const filteredSchedules = schedules.filter(schedule => {
 });
 ```
 
-### Schedule to Task Conversion
+### 일정을 할 일로 변환
 
-Per spec.md section 4.2, converting a schedule to task:
-- Creates a new parent task
-- `startDate` = today
-- `endDate` = schedule's end date
+spec.md 섹션 4.2에 따라 일정을 작업으로 변환:
+- 새 부모 작업 생성
+- `startDate` = 오늘
+- `endDate` = 일정의 종료 날짜
 - `status` = 'todo'
-- Appears in both Kanban and Gantt
+- 칸반과 간트 모두에 표시됨
 
-## 🎨 Design System
+### 그룹 일정 조율
 
-### Colors
+When2Meet 스타일의 일정 조율:
+- 그룹 멤버들의 일정을 시각적으로 표시
+- 회색 블록으로 타인의 바쁜 시간 표시 (프라이버시 보호)
+- 모든 멤버가 비어있는 시간 자동 찾기
+- 클릭하여 선택된 시간에 그룹 일정 생성
 
+## 디자인 시스템
+
+### 색상
+
+- **로컬 캘린더**: `#84cc16` (Green)
 - **Google Calendar**: `#2c7fff` (Blue)
-- **Local Calendar**: `#84cc16` (Green)
 - **E-Campus**: `#a855f7` (Purple)
-- **Task Status**:
-  - To Do: Gray
-  - In Progress: Blue
-  - Done: Green
+- **작업 상태**:
+  - 할 일: Gray
+  - 진행 중: Blue
+  - 완료: Green
+- **Primary**: Blue (`#3b82f6`)
 
-### Typography
+### 타이포그래피
 
-- Korean font support
-- System font stack with fallbacks
-- Responsive text sizing
+- 한글 폰트 지원
+- 시스템 폰트 스택 (fallback 포함)
+- 반응형 텍스트 크기
 
-## 📱 Responsive Design
+## 반응형 디자인
 
-- Desktop-first approach
-- Mobile navigation drawer
-- Responsive grid layouts
-- Touch-friendly UI elements
+- 데스크톱 우선 접근
+- 모바일 네비게이션 드로어
+- 반응형 그리드 레이아웃
+- 터치 친화적 UI 요소
 
-## 🔐 Security Considerations
+## 보안 고려사항
 
-**Current (Mock) Implementation:**
-- Passwords are not validated (for development)
-- No actual password hashing
-- Mock token generation
+**현재 구현:**
+- JWT 토큰 기반 인증
+- localStorage에 토큰 저장
+- axios interceptor로 자동 토큰 첨부
+- 만료된 토큰 자동 처리
 
-**For Production:**
-- Implement proper password hashing (bcrypt)
-- Use secure JWT tokens
-- HTTPS only
-- CSRF protection
-- Rate limiting on API endpoints
+**프로덕션 권장사항:**
+- HTTPS 전용
+- CSRF 보호
+- API 엔드포인트 속도 제한
+- 민감 정보 암호화
+- XSS 방지
 
-## 🚢 Deployment Checklist
+## 배포 체크리스트
 
-### Backend Integration
-- [x] Replace auth API with real backend (JWT)
-- [x] Replace calendars API with categories endpoint
-- [x] Replace schedules API with backend
-- [x] Replace tasks API with todos endpoint
-- [x] Implement auto-create default calendar
-- [ ] Integrate friends API
-- [ ] Integrate groups API
-- [ ] Integrate notifications API
-- [ ] Implement Google Calendar OAuth
-- [ ] Implement Canvas/E-Campus sync
+### 백엔드 통합
+- [x] 인증 API 실제 백엔드로 교체 (JWT)
+- [x] 캘린더 API를 categories 엔드포인트로 교체
+- [x] 일정 API 백엔드 연동
+- [x] 할 일 API를 todos 엔드포인트로 교체
+- [x] 기본 캘린더 자동 생성 구현
+- [x] 친구 API 통합
+- [x] 그룹 API 통합
+- [x] E-Campus 동기화 구현
+- [ ] 알림 API 통합
+- [ ] Google Calendar OAuth 구현
 
-### Production Ready
-- [x] Environment variables for API URLs
-- [x] JWT authentication with token refresh
-- [x] Error handling in API layer
-- [ ] Set up error tracking (e.g., Sentry)
-- [ ] Add comprehensive loading states
-- [ ] Add error boundaries
-- [ ] Add analytics
-- [ ] Optimize bundle size
-- [ ] Add service worker for PWA
-- [ ] Set up CI/CD pipeline
+### 프로덕션 준비
+- [x] API URL을 위한 환경 변수
+- [x] 토큰 갱신이 포함된 JWT 인증
+- [x] API 레이어 오류 처리
+- [x] 포괄적인 로딩 상태
+- [ ] 오류 추적 설정 (예: Sentry)
+- [ ] 오류 경계 추가
+- [ ] 분석 추가
+- [ ] 번들 크기 최적화
+- [ ] PWA를 위한 서비스 워커 추가
+- [ ] CI/CD 파이프라인 설정
 
-## 📄 License
+## 최근 업데이트
+
+### 2025-01-04
+- 친구 API 백엔드 통합 완료
+- 그룹 API 백엔드 통합 완료
+- E-Campus (Canvas LMS) 연동 완료
+- 그룹 일정 생성 시 그룹 탭에 자동 추가
+- 그룹 일정 멤버 툴팁 표시
+- 사이드바 타이틀 "Calendar" → "UniSync" 변경
+- 디자인 통일 (버튼 색상)
+- 하드코딩된 알림 제거
+
+## 라이선스
 
 Private project
 
-## 👥 Credits
+## 크레딧
 
-Built following the specifications in [spec.md](spec.md)
+[spec.md](spec.md)의 명세를 따라 제작되었습니다.
