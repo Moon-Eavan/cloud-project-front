@@ -373,7 +373,7 @@ export default function App() {
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-white/80 backdrop-blur-xl border-r border-gray-200">
       <div className="p-6 border-b border-gray-200">
-        <h1 className="text-xl text-gray-900">Calendar</h1>
+        <h1 className="text-xl text-gray-900">UniSync</h1>
       </div>
       <nav className="p-4">
         <ul className="space-y-1">
