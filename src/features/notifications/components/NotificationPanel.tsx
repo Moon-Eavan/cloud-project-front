@@ -33,23 +33,34 @@ export default function NotificationPanel() {
         return;
       }
 
+      // Get current notifications to check for existing friend request notifications
+      const currentNotifications = await notificationsApi.listNotifications();
+      const existingRequestIds = new Set(
+        currentNotifications
+          .filter(n => n.type === 'friend_request' && n.relatedId)
+          .map(n => n.relatedId)
+      );
+
       let hasNewRequests = false;
 
       // Check for new requests that we haven't processed yet
       for (const request of pendingRequests) {
-        if (!processedRequestIdsRef.current.has(request.id)) {
-          // Create notification for this friend request
-          await notificationsApi.createNotification(
-            'friend_request',
-            '친구 요청',
-            `${request.fromUserName}님이 친구 요청을 보냈습니다.`,
-            request.id,
-            '/friends'
-          );
-
-          processedRequestIdsRef.current.add(request.id);
-          hasNewRequests = true;
+        // Skip if already in processedRef or if notification already exists
+        if (processedRequestIdsRef.current.has(request.id) || existingRequestIds.has(request.id)) {
+          continue;
         }
+
+        // Create notification for this friend request
+        await notificationsApi.createNotification(
+          'friend_request',
+          '친구 요청',
+          `${request.fromUserName}님이 친구 요청을 보냈습니다.`,
+          request.id,
+          '/friends'
+        );
+
+        processedRequestIdsRef.current.add(request.id);
+        hasNewRequests = true;
       }
 
       // Reload notifications if there were new requests
@@ -63,17 +74,15 @@ export default function NotificationPanel() {
 
   useEffect(() => {
     loadNotifications();
+    checkForNewFriendRequests(); // Initial check
 
-    // Disabled polling - causes infinite refresh
-    // checkForNewFriendRequests(); // Initial check
+    // Poll for new friend requests every 30 seconds
+    const interval = setInterval(() => {
+      checkForNewFriendRequests();
+    }, 30000);
 
-    // Poll for new friend requests every 10 seconds
-    // const interval = setInterval(() => {
-    //   checkForNewFriendRequests();
-    // }, 10000);
-
-    // return () => clearInterval(interval);
-  }, [loadNotifications]);
+    return () => clearInterval(interval);
+  }, [loadNotifications, checkForNewFriendRequests]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 

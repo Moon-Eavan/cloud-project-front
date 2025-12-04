@@ -76,6 +76,8 @@ export default function FriendsPage() {
       setSearchResults([]);
       setSearchQuery('');
       setIsAddDialogOpen(false);
+      // Notification will be automatically created by NotificationPanel
+      // when the recipient checks their pending requests
     } catch (error: any) {
       console.error('친구 요청 전송 실패:', error);
       toast.error(error.message || '친구 요청 전송에 실패했습니다.');
