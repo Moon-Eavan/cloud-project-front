@@ -758,8 +758,7 @@
                   }
                 }
               }
-            },
-            "headers": {}
+            }
           }
         },
         "security": [
@@ -857,8 +856,7 @@
                   ]
                 }
               }
-            },
-            "headers": {}
+            }
           }
         },
         "security": [
@@ -934,8 +932,7 @@
                   }
                 }
               }
-            },
-            "headers": {}
+            }
           }
         },
         "security": [
@@ -1032,8 +1029,7 @@
                   ]
                 }
               }
-            },
-            "headers": {}
+            }
           }
         },
         "security": [
@@ -1117,8 +1113,7 @@
                   }
                 }
               }
-            },
-            "headers": {}
+            }
           }
         },
         "security": [
@@ -1574,8 +1569,7 @@
                   ]
                 }
               }
-            },
-            "headers": {}
+            }
           }
         },
         "security": [
@@ -3201,7 +3195,27 @@
         "tags": [
           "Schedule"
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "includeGroups",
+            "in": "query",
+            "description": "true시 해당 사용자가 속한 모든 그룹의 일정도 추가로 가져옴",
+            "required": false,
+            "example": "false",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "groupId",
+            "in": "query",
+            "description": "포함시 그룹일정을 가져옴",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -4566,6 +4580,7 @@
   },
   "components": {
     "schemas": {},
+    "responses": {},
     "securitySchemes": {
       "Bearer": {
         "bearerFormat": "JWT",
