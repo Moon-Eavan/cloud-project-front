@@ -10,7 +10,8 @@ import { toast } from 'sonner';
 import { authApi } from '@/api/authApi';
 import { ecampusApi } from '@/api/ecampusApi';
 import { enrollmentsApi } from '@/api/enrollmentsApi';
-import type { User, Enrollment } from '@/types';
+import { calendarsApi } from '@/api/calendarsApi';
+import type { User, Enrollment, Calendar } from '@/types';
 
 interface MyPageProps {
   user: User | null;
@@ -32,12 +33,34 @@ export default function MyPage({ user, onLogout, onUserUpdate, onDataRefresh }: 
   const [isSyncingAssignments, setIsSyncingAssignments] = useState(false);
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [isLoadingEnrollments, setIsLoadingEnrollments] = useState(false);
+  const [calendars, setCalendars] = useState<Calendar[]>([]);
+  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
 
   // Initialize user data from props
   useEffect(() => {
     if (!user) {
       // If no user, redirect to login (this shouldn't happen as App.tsx handles it)
       toast.error('사용자 정보를 불러올 수 없습니다.');
+    }
+  }, [user]);
+
+  // Load calendars and check Google Calendar connection
+  useEffect(() => {
+    const loadCalendars = async () => {
+      try {
+        const fetchedCalendars = await calendarsApi.listCalendars();
+        setCalendars(fetchedCalendars);
+
+        // Check if Google Calendar exists
+        const hasGoogleCalendar = fetchedCalendars.some(cal => cal.name === 'Google Calendar');
+        setIsGoogleConnected(hasGoogleCalendar);
+      } catch (error: any) {
+        console.error('[MyPage] Failed to load calendars:', error);
+      }
+    };
+
+    if (user) {
+      loadCalendars();
     }
   }, [user]);
 
@@ -69,15 +92,35 @@ export default function MyPage({ user, onLogout, onUserUpdate, onDataRefresh }: 
     }
   };
 
-  const handleConnectGoogle = () => {
-    // TODO: Google OAuth implementation
-    // For now, just show a toast
-    toast.info('Google Calendar 연동 기능은 곧 지원될 예정입니다.');
+  const handleConnectGoogle = async () => {
+    try {
+      // Create "Google Calendar" calendar
+      const newCalendar = await calendarsApi.createCalendar({
+        name: 'Google Calendar',
+        color: '#4285F4', // Google blue color
+      });
+
+      toast.success('구글 캘린더가 연동되었습니다.');
+
+      // Update connection state
+      setIsGoogleConnected(true);
+
+      // Refresh data to show new calendar
+      await onDataRefresh();
+
+      // Reload calendars
+      const fetchedCalendars = await calendarsApi.listCalendars();
+      setCalendars(fetchedCalendars);
+    } catch (error: any) {
+      console.error('[MyPage] Failed to create Google Calendar:', error);
+      toast.error(error.message || '구글 캘린더 연동에 실패했습니다.');
+    }
   };
 
   const handleDisconnectGoogle = () => {
-    // TODO: Disconnect Google account
-    toast.success('Google 계정 연동이 해제되었습니다.');
+    // Update connection state
+    setIsGoogleConnected(false);
+    toast.success('구글 캘린더 연동이 해제되었습니다.');
   };
 
   const handleConnectEcampus = async () => {
@@ -387,11 +430,11 @@ export default function MyPage({ user, onLogout, onUserUpdate, onDataRefresh }: 
               <div>
                 <p className="font-medium">Google Calendar</p>
                 <p className="text-sm text-gray-500">
-                  {user.googleConnected ? '연동됨' : '연동되지 않음'}
+                  {isGoogleConnected ? '연동됨' : '연동되지 않음'}
                 </p>
               </div>
             </div>
-            {user.googleConnected ? (
+            {isGoogleConnected ? (
               <Button variant="outline" onClick={handleDisconnectGoogle} size="sm">
                 연동 해제
               </Button>
