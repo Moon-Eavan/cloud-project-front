@@ -49,12 +49,14 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
   const [newProject, setNewProject] = useState({
     title: '',
     description: '',
-    ...getDefaultDates()
+    ...getDefaultDates(),
+    deadline: ''
   });
   const [newSubTask, setNewSubTask] = useState({
     title: '',
     description: '',
-    ...getDefaultDates()
+    ...getDefaultDates(),
+    deadline: ''
   });
 
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -207,17 +209,24 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
   const handleAddProject = async () => {
     if (newProject.title.trim() && newProject.startDate && newProject.endDate) {
       try {
-        const createdTask = await tasksApi.createTaskFromGantt({
+        const taskData: any = {
           title: newProject.title,
           description: newProject.description,
           startDate: new Date(newProject.startDate),
           endDate: new Date(newProject.endDate),
           status: 'todo',
           parentTaskId: null,
-        });
+        };
+
+        // Add deadline if provided
+        if (newProject.deadline) {
+          taskData.deadline = new Date(newProject.deadline);
+        }
+
+        const createdTask = await tasksApi.createTaskFromGantt(taskData);
 
         setTasks([...tasks, createdTask]);
-        setNewProject({ title: '', description: '', ...getDefaultDates() });
+        setNewProject({ title: '', description: '', ...getDefaultDates(), deadline: '' });
         setIsProjectDialogOpen(false);
         toast.success('프로젝트가 추가되었습니다.');
       } catch (error) {
@@ -235,16 +244,23 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
       newSubTask.endDate
     ) {
       try {
-        const createdTask = await tasksApi.createSubtask(selectedProjectId, {
+        const taskData: any = {
           title: newSubTask.title,
           description: newSubTask.description,
           startDate: new Date(newSubTask.startDate),
           endDate: new Date(newSubTask.endDate),
           status: 'todo',
-        });
+        };
+
+        // Add deadline if provided
+        if (newSubTask.deadline) {
+          taskData.deadline = new Date(newSubTask.deadline);
+        }
+
+        const createdTask = await tasksApi.createSubtask(selectedProjectId, taskData);
 
         setTasks([...tasks, createdTask]);
-        setNewSubTask({ title: '', description: '', ...getDefaultDates() });
+        setNewSubTask({ title: '', description: '', ...getDefaultDates(), deadline: '' });
         setIsSubTaskDialogOpen(false);
         toast.success('서브태스크가 추가되었습니다.');
       } catch (error) {
@@ -295,6 +311,7 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
         description: editingTask.description,
         startDate: editingTask.startDate,
         endDate: editingTask.endDate,
+        deadline: editingTask.deadline,
       };
 
       const updatedTask = await tasksApi.updateTask(editingTask.id, updates);
@@ -374,6 +391,15 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
                   onChange={(e) => setNewProject({ ...newProject, endDate: e.target.value })}
                 />
               </div>
+              <div>
+                <Label htmlFor="project-deadline">데드라인 (선택사항)</Label>
+                <Input
+                  id="project-deadline"
+                  type="datetime-local"
+                  value={newProject.deadline}
+                  onChange={(e) => setNewProject({ ...newProject, deadline: e.target.value })}
+                />
+              </div>
               <Button onClick={handleAddProject} className="w-full bg-blue-500 hover:bg-blue-600">
                 추가
               </Button>
@@ -433,6 +459,15 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
                 onChange={(e) => setNewSubTask({ ...newSubTask, endDate: e.target.value })}
               />
             </div>
+            <div>
+              <Label htmlFor="subtask-deadline">데드라인 (선택사항)</Label>
+              <Input
+                id="subtask-deadline"
+                type="datetime-local"
+                value={newSubTask.deadline}
+                onChange={(e) => setNewSubTask({ ...newSubTask, deadline: e.target.value })}
+              />
+            </div>
             <Button onClick={handleAddSubTask} className="w-full bg-blue-500 hover:bg-blue-600">
               추가
             </Button>
@@ -483,6 +518,15 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
                   type="date"
                   value={editingTask.endDate.toISOString().split('T')[0]}
                   onChange={(e) => setEditingTask({ ...editingTask, endDate: new Date(e.target.value) })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-deadline">데드라인 (선택사항)</Label>
+                <Input
+                  id="edit-deadline"
+                  type="datetime-local"
+                  value={editingTask.deadline ? new Date(editingTask.deadline.getTime() - editingTask.deadline.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ''}
+                  onChange={(e) => setEditingTask({ ...editingTask, deadline: e.target.value ? new Date(e.target.value) : undefined })}
                 />
               </div>
               <Button onClick={handleUpdateTask} className="w-full bg-blue-500 hover:bg-blue-600">
@@ -600,6 +644,19 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
                           boxShadow: '0 4px 6px -1px rgba(199, 233, 228, 0.3)'
                         }}
                       ></div>
+                      {/* Deadline indicator for tasks with deadline */}
+                      {project.deadline && (
+                        <div
+                          className="absolute top-0 h-full pointer-events-none"
+                          style={{
+                            left: `${Math.max(0, Math.ceil((project.deadline.getTime() - chartStart.getTime()) / (1000 * 60 * 60 * 24))) * dayWidth}px`,
+                            width: '2px',
+                            backgroundColor: '#ef4444',
+                            boxShadow: '0 0 4px rgba(239, 68, 68, 0.5)',
+                            zIndex: 10
+                          }}
+                        ></div>
+                      )}
                     </div>
                   </div>
 
@@ -646,6 +703,19 @@ export default function GanttChart({ tasks, setTasks }: GanttChartProps) {
                                 boxShadow: '0 4px 6px -1px rgba(180, 206, 225, 0.3)'
                               }}
                             ></div>
+                            {/* Deadline indicator for tasks with deadline */}
+                            {subTask.deadline && (
+                              <div
+                                className="absolute top-0 h-full pointer-events-none"
+                                style={{
+                                  left: `${Math.max(0, Math.ceil((subTask.deadline.getTime() - chartStart.getTime()) / (1000 * 60 * 60 * 24))) * dayWidth}px`,
+                                  width: '2px',
+                                  backgroundColor: '#ef4444',
+                                  boxShadow: '0 0 4px rgba(239, 68, 68, 0.5)',
+                                  zIndex: 10
+                                }}
+                              ></div>
+                            )}
                           </div>
                         </div>
                       ))}

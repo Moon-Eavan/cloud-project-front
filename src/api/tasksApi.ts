@@ -14,6 +14,7 @@ interface TodoResponse {
   description: string | null;
   startDate: string; // ISO 8601 date (YYYY-MM-DD)
   dueDate: string; // ISO 8601 date (YYYY-MM-DD)
+  deadline: string | null; // ISO 8601 datetime (YYYY-MM-DDTHH:mm:ss)
   status: 'TODO' | 'IN_PROGRESS' | 'DONE';
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | null;
   progressPercentage: number;
@@ -66,6 +67,7 @@ const mapTodoResponseToTask = (response: TodoResponse): Task => {
     status: mapBackendStatusToFrontend(response.status),
     parentTaskId: response.parentTodoId ? response.parentTodoId.toString() : null,
     scheduleId: response.scheduleId ? response.scheduleId.toString() : undefined,
+    deadline: response.deadline ? new Date(response.deadline) : undefined,
   };
 };
 
@@ -100,7 +102,18 @@ export const tasksApi = {
       const defaultCategoryId = categoriesResponse.data[0].categoryId;
       console.log('[tasksApi] Using categoryId:', defaultCategoryId);
 
-      const requestBody = {
+      // Format deadline if provided
+      const formatDeadline = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+      };
+
+      const requestBody: any = {
         title: taskData.title,
         description: taskData.description || null,
         startDate: formatDateToString(taskData.startDate),
@@ -110,6 +123,11 @@ export const tasksApi = {
         scheduleId: null,
         priority: 'MEDIUM', // Default priority
       };
+
+      // Add deadline if provided
+      if (taskData.deadline) {
+        requestBody.deadline = formatDeadline(taskData.deadline);
+      }
 
       console.log('[tasksApi] Request body:', requestBody);
       const response = await apiClient.post<TodoResponse>('/v1/todos', requestBody);
@@ -142,8 +160,19 @@ export const tasksApi = {
       const defaultCategoryId = categoriesResponse.data[0].categoryId;
       console.log('[tasksApi] Using categoryId:', defaultCategoryId);
 
+      // Format deadline if provided
+      const formatDeadline = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+      };
+
       // Otherwise, create a parent task
-      const requestBody = {
+      const requestBody: any = {
         title: taskData.title,
         description: taskData.description || null,
         startDate: formatDateToString(taskData.startDate),
@@ -153,6 +182,11 @@ export const tasksApi = {
         scheduleId: null,
         priority: 'MEDIUM', // Default priority
       };
+
+      // Add deadline if provided
+      if (taskData.deadline) {
+        requestBody.deadline = formatDeadline(taskData.deadline);
+      }
 
       console.log('[tasksApi] Request body:', requestBody);
       const response = await apiClient.post<TodoResponse>('/v1/todos', requestBody);
@@ -189,8 +223,19 @@ export const tasksApi = {
       const currentTaskResponse = await apiClient.get<TodoResponse>(`/v1/todos/${taskId}`);
       const currentTask = currentTaskResponse.data;
 
+      // Format deadline if provided
+      const formatDeadline = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+      };
+
       // Merge updates with current task data
-      const requestBody = {
+      const requestBody: any = {
         title: updates.title !== undefined ? updates.title : currentTask.title,
         description: updates.description !== undefined ? (updates.description || null) : currentTask.description,
         startDate: updates.startDate !== undefined ? formatDateToString(updates.startDate) : currentTask.startDate,
@@ -200,6 +245,13 @@ export const tasksApi = {
         priority: currentTask.priority || 'MEDIUM',
         groupId: currentTask.groupId,
       };
+
+      // Handle deadline updates
+      if (updates.deadline !== undefined) {
+        requestBody.deadline = updates.deadline ? formatDeadline(updates.deadline) : null;
+      } else {
+        requestBody.deadline = currentTask.deadline;
+      }
 
       console.log('[tasksApi.updateTask] Request body:', requestBody);
       const response = await apiClient.put<TodoResponse>(`/v1/todos/${taskId}`, requestBody);
@@ -242,7 +294,18 @@ export const tasksApi = {
       const defaultCategoryId = categoriesResponse.data[0].categoryId;
       console.log('[tasksApi.createSubtask] Using categoryId:', defaultCategoryId);
 
-      const requestBody = {
+      // Format deadline if provided
+      const formatDeadline = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+      };
+
+      const requestBody: any = {
         title: subtaskData.title,
         description: subtaskData.description || null,
         startDate: formatDateToString(subtaskData.startDate),
@@ -251,6 +314,11 @@ export const tasksApi = {
         scheduleId: null,
         priority: 'MEDIUM', // Default priority
       };
+
+      // Add deadline if provided
+      if (subtaskData.deadline) {
+        requestBody.deadline = formatDeadline(subtaskData.deadline);
+      }
 
       console.log('[tasksApi.createSubtask] Request body:', requestBody);
       const response = await apiClient.post<TodoResponse>(
@@ -270,11 +338,23 @@ export const tasksApi = {
    */
   async createTaskFromSchedule(schedule: { id: string; title: string; description?: string; start: Date; end: Date; calendarId: string }): Promise<Task> {
     try {
+      // Format deadline as ISO 8601 datetime (YYYY-MM-DDTHH:mm:ss)
+      const formatDeadline = (date: Date): string => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+      };
+
       const requestBody = {
         title: schedule.title,
         description: schedule.description || null,
         startDate: formatDateToString(new Date()), // Start today
-        dueDate: formatDateToString(schedule.end), // Deadline = schedule end date
+        dueDate: formatDateToString(schedule.end), // Due date = schedule end date
+        deadline: formatDeadline(schedule.end), // Deadline = schedule end datetime
         status: 'TODO',
         categoryId: parseInt(schedule.calendarId),
         scheduleId: parseInt(schedule.id), // Link to schedule

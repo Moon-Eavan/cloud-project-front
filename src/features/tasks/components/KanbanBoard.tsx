@@ -44,11 +44,13 @@ export default function KanbanBoard({ tasks, setTasks }: KanbanBoardProps) {
     status: TaskStatus;
     startDate: string;
     endDate: string;
+    deadline: string;
   }>({
     title: '',
     description: '',
     status: 'todo',
-    ...getDefaultDates()
+    ...getDefaultDates(),
+    deadline: ''
   });
 
   // 칸반보드에는 subtask가 없는 parent task와 subtask만 표시
@@ -70,15 +72,22 @@ export default function KanbanBoard({ tasks, setTasks }: KanbanBoardProps) {
   const handleAddTask = async () => {
     if (newTask.title.trim()) {
       try {
-        const createdTask = await tasksApi.createTaskFromKanban({
+        const taskData: any = {
           title: newTask.title,
           description: newTask.description,
           startDate: new Date(newTask.startDate),
           endDate: new Date(newTask.endDate),
           status: newTask.status,
-        });
+        };
+
+        // Add deadline if provided
+        if (newTask.deadline) {
+          taskData.deadline = new Date(newTask.deadline);
+        }
+
+        const createdTask = await tasksApi.createTaskFromKanban(taskData);
         setTasks([...tasks, createdTask]);
-        setNewTask({ title: '', description: '', status: 'todo', ...getDefaultDates() });
+        setNewTask({ title: '', description: '', status: 'todo', ...getDefaultDates(), deadline: '' });
         setIsDialogOpen(false);
         toast.success('작업이 추가되었습니다.');
       } catch (error) {
@@ -124,6 +133,7 @@ export default function KanbanBoard({ tasks, setTasks }: KanbanBoardProps) {
         description: editingTask.description,
         startDate: editingTask.startDate,
         endDate: editingTask.endDate,
+        deadline: editingTask.deadline,
       };
 
       const updatedTask = await tasksApi.updateTask(editingTask.id, updates);
@@ -202,6 +212,15 @@ export default function KanbanBoard({ tasks, setTasks }: KanbanBoardProps) {
                   onChange={(e) => setNewTask({ ...newTask, endDate: e.target.value })}
                 />
               </div>
+              <div>
+                <Label htmlFor="deadline">데드라인 (선택사항)</Label>
+                <Input
+                  id="deadline"
+                  type="datetime-local"
+                  value={newTask.deadline}
+                  onChange={(e) => setNewTask({ ...newTask, deadline: e.target.value })}
+                />
+              </div>
               <Button onClick={handleAddTask} className="w-full bg-blue-500 hover:bg-blue-600">
                 추가
               </Button>
@@ -252,6 +271,15 @@ export default function KanbanBoard({ tasks, setTasks }: KanbanBoardProps) {
                   type="date"
                   value={editingTask.endDate.toISOString().split('T')[0]}
                   onChange={(e) => setEditingTask({ ...editingTask, endDate: new Date(e.target.value) })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-deadline">데드라인 (선택사항)</Label>
+                <Input
+                  id="edit-deadline"
+                  type="datetime-local"
+                  value={editingTask.deadline ? new Date(editingTask.deadline.getTime() - editingTask.deadline.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ''}
+                  onChange={(e) => setEditingTask({ ...editingTask, deadline: e.target.value ? new Date(e.target.value) : undefined })}
                 />
               </div>
               <Button onClick={handleUpdateTask} className="w-full bg-blue-500 hover:bg-blue-600">
