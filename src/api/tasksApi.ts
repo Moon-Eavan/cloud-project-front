@@ -1,5 +1,6 @@
 // Tasks API - Backend Integration
 import apiClient from './client';
+import { stripHtml } from '@/lib/htmlUtils';
 import type { Task, TaskStatus } from '@/types';
 
 // Backend TodoResponse type
@@ -339,7 +340,7 @@ export const tasksApi = {
 
       const requestBody = {
         title: schedule.title,
-        description: schedule.description || null,
+        description: schedule.description ? stripHtml(schedule.description) : null,
         startDate: formatDateToString(new Date()), // Start today
         dueDate: formatDateToString(schedule.end), // Due date = schedule end date
         deadline: formatDeadline(schedule.end), // Deadline = schedule end datetime
