@@ -102,12 +102,12 @@ export const tasksApi = {
       const defaultCategoryId = categoriesResponse.data[0].categoryId;
       console.log('[tasksApi] Using categoryId:', defaultCategoryId);
 
-      // Format deadline if provided (date only, time set to 00:00:00)
+      // Format deadline if provided (date only, time set to 23:59:59)
       const formatDeadline = (date: Date): string => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}T00:00:00`;
+        return `${year}-${month}-${day}T23:59:59`;
       };
 
       const requestBody: any = {
@@ -157,12 +157,12 @@ export const tasksApi = {
       const defaultCategoryId = categoriesResponse.data[0].categoryId;
       console.log('[tasksApi] Using categoryId:', defaultCategoryId);
 
-      // Format deadline if provided (date only, time set to 00:00:00)
+      // Format deadline if provided (date only, time set to 23:59:59)
       const formatDeadline = (date: Date): string => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}T00:00:00`;
+        return `${year}-${month}-${day}T23:59:59`;
       };
 
       // Otherwise, create a parent task
@@ -217,12 +217,12 @@ export const tasksApi = {
       const currentTaskResponse = await apiClient.get<TodoResponse>(`/v1/todos/${taskId}`);
       const currentTask = currentTaskResponse.data;
 
-      // Format deadline if provided (date only, time set to 00:00:00)
+      // Format deadline if provided (date only, time set to 23:59:59)
       const formatDeadline = (date: Date): string => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}T00:00:00`;
+        return `${year}-${month}-${day}T23:59:59`;
       };
 
       // Merge updates with current task data
@@ -285,12 +285,12 @@ export const tasksApi = {
       const defaultCategoryId = categoriesResponse.data[0].categoryId;
       console.log('[tasksApi.createSubtask] Using categoryId:', defaultCategoryId);
 
-      // Format deadline if provided (date only, time set to 00:00:00)
+      // Format deadline if provided (date only, time set to 23:59:59)
       const formatDeadline = (date: Date): string => {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}T00:00:00`;
+        return `${year}-${month}-${day}T23:59:59`;
       };
 
       const requestBody: any = {
