@@ -2,6 +2,11 @@
 
 대학생을 위한 현대적인 일정 및 할 일 관리 애플리케이션입니다. React, TypeScript, Vite로 구축되었으며 E-Campus(Canvas LMS), Google Calendar와의 통합을 지원합니다.
 
+## 관련 리포지토리
+
+- **프론트엔드**: [UniSync-front](https://github.com/Moon-Eavan/cloud-project-front) (현재 리포지토리)
+- **백엔드**: [UniSync-backend](https://github.com/SolidCitadel/UniSync)
+
 ## 요구사항
 
 - Node.js: >= 20.10.0 (권장: 20.x LTS)
